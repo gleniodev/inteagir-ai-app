@@ -1,0 +1,5 @@
+# Imagem de contingência
+
+Arquivo: fracao-trem.png. Criado em 14/10/2026 com a ferramenta integrada imagegen, copiado para o repositório e aberto visualmente. Observados quatro vagões de dimensões semelhantes, primeiro azul e três cinza; sem texto e sem locomotiva. Ilustração estática para analogia de 1/4; revisão docente continua obrigatória. Não é evidência de geração no VPS/PWA.
+
+Prompt: “Use case: scientific-educational. Asset type: static educational PNG for a clearly labelled pre-generated school demonstration. Primary request: a clean realistic 3D illustration of one train with exactly FOUR equal-sized rectangular passenger carriages in a straight horizontal line, seen fully from the side, all four identical length and height. The first carriage is blue, the other three are light grey, illustrating one quarter. No locomotive, no extra carriage, no objects covering carriages. Subtle wheels for each carriage, a single simple track, white background. No writing, numbers, letters, logos, people, motion, arrows or decoration. All four carriages must be clearly separated and countable; equal size is crucial to teach fractions. Wide composition.”
