@@ -2,6 +2,16 @@
 
 > **Versão:** 1.0 · **Escopo:** navegação e comportamento que podem ser implementados em um dia. Consulte [ESCOPO.md](ESCOPO.md) e [REGRAS_DA_IA.md](REGRAS_DA_IA.md).
 
+## Referências visuais obrigatórias
+
+A implementação visual **deve seguir fielmente** os arquivos disponibilizados em `docs/referencia-telas/` no repositório. Essa pasta define o **design system visual** de todas as áreas: logo, cores, fontes, espaçamento, grid, cabeçalho, hero, banners, botões, ícones, cards, ornamentos, responsividade e estética das telas. Não substituir por interface genérica, não simplificar arbitrariamente as áreas nem criar outra linguagem visual.
+
+O comportamento, conteúdo, campos e jornadas **continuam sendo definidos por este documento, `ESCOPO.md`, `REGRAS_DA_IA.md` e `BACKLOG.md`**. Mockups são referência visual, não autorização para incluir funções de cadastro, marketing ou telas sem sentido operacional. A tela visual deve ser adaptada aos conteúdos e controles corretos preservando o design.
+
+Para cada página, a equipe deve (1) localizar e visualizar a(s) imagem(ns) de referência; (2) registrar correspondência `tela → referência`; (3) reutilizar assets originais quando disponíveis; (4) implementar com Tailwind os tokens e componentes comuns; (5) comparar visualmente a tela implementada com a referência antes da aceitação. Acessibilidade pode exigir ajustes mínimos, que devem ser documentados.
+
+Se a pasta não estiver presente na branch de trabalho, **não inventar o design**: registrar dependência e solicitar a inclusão dos arquivos no repositório/ambiente, enquanto as tarefas não visuais podem continuar.
+
 ## 1. Mapa de navegação
 
 ```text

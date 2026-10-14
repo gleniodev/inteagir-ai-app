@@ -20,7 +20,8 @@
 
 | ID | Prioridade | Tarefa | Dono | Dependência | Critério de pronto |
 |---|---|---|---|---|---|
-| T01 | P0 | Configurar Vite/React, Tailwind, rotas, AppShell e PWA | FE-P | — | `npm run build` passa; todas as 6 áreas abrem; layout não quebra no mobile. |
+| T00 | P0 | Inspecionar `docs/referencia-telas/`, mapear tela→referência, inventariar assets e definir tokens Tailwind fiéis | FE-P | — | Referências realmente abertas e mapeadas; logos, hero, banners, ícones, tipografia e cores identificados; faltas/bloqueios registrados. |
+| T01 | P0 | Configurar Vite/React, Tailwind, rotas, AppShell e PWA | FE-P | T00 | `npm run build` passa; todas as 6 áreas abrem; UI comparada às referências pertinentes; layout não quebra no mobile. |
 | T02 | P0 | Definir contratos JSON de aluno, aula, sessão e geração | LT | — | Exemplos versionados e aceitos por FE-P/FE-A/BE-IA, sem campos contraditórios. |
 | T03 | P0 | Servidor Express + leitura/escrita atômica em JSON | BE-IA | T02 | Criar/ler/atualizar dado; sobrevive reinício; entradas inválidas são rejeitadas. |
 | T04 | P0 | Cadastro do aluno + 10 perguntas | FE-A | T01, T02 | Cria aluno fictício, seleciona turma, edita perfil e reabre respostas persistidas. |
@@ -67,7 +68,7 @@ Autenticação e permissões reais por papel; conexão com cadastro escolar; sin
 
 | Janela | Entrega esperada | Equipes em paralelo |
 |---|---|---|
-| Hora 1 | T01/T02: esqueleto + JSON comum | FE-P + LT/BE-IA |
+| Hora 1 | T00/T01/T02: referência visual, esqueleto + JSON comum | FE-P + LT/BE-IA |
 | Hora 2 | T03/T04: persistência e cadastro | BE-IA + FE-A |
 | Hora 3 | T05/T06 e G1/G2: professor + entrada de material; testes de assinatura | FE-P + BE-IA/LT |
 | Hora 4 | T07/T08/T09: prompt composto e imagem real | FE-P + BE-IA |
@@ -81,6 +82,7 @@ Autenticação e permissões reais por papel; conexão com cadastro escolar; sin
 ## 6. Critério de pronto para toda tarefa (Definition of Done)
 
 - [ ] Foi implementado o **comportamento** descrito, não apenas layout estático.
+- [ ] Se houver interface, ela foi comparada à(s) referência(s) de `docs/referencia-telas/`; diferenças e decisões de acessibilidade foram registradas.
 - [ ] Há teste manual ou automatizado reproduzível com entrada e saída esperadas.
 - [ ] Erros de rede, arquivo inválido e estados vazios não quebram a tela.
 - [ ] Dados de demonstração são fictícios; não há token, senha, nome real ou informação sensível no repositório.

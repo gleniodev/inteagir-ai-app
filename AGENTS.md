@@ -2,7 +2,7 @@
 
 > **Obrigatório para qualquer agente que proponha, crie, edite ou revise código neste repositório.**
 >
-> **Ordem de referência:** [ESCOPO.md](ESCOPO.md) → [TELAS_E_FLUXOS.md](TELAS_E_FLUXOS.md) → [REGRAS_DA_IA.md](REGRAS_DA_IA.md) → [BACKLOG.md](BACKLOG.md) → este arquivo. Na dúvida, **não invente requisito**.
+> **Fontes de verdade:** requisitos, conteúdo e comportamento: [ESCOPO.md](ESCOPO.md) → [TELAS_E_FLUXOS.md](TELAS_E_FLUXOS.md) → [REGRAS_DA_IA.md](REGRAS_DA_IA.md) → [BACKLOG.md](BACKLOG.md). Aparência, composição e identidade visual: **`docs/referencia-telas/`**. Instruções de execução: este `AGENTS.md`. Na dúvida, **não invente requisito nem novo design**.
 
 ## 1. Missão
 
@@ -23,6 +23,23 @@ Construir em um dia um **MVP demonstrável**, com aparência profissional, para 
 - **Layout:** React + Tailwind. **Nunca gerar figuras pedagógicas complexas em React, SVG ou CSS para imitar geração de imagem.** React apenas exibe imagens e oferece controles de interface.
 
 Não introduza Next.js, banco de dados, Supabase, Firebase, serviços pagos, bibliotecas de componentes grandes, novas APIs comerciais ou orquestradores adicionais sem autorização explícita do líder técnico.
+
+## 2A. Referências visuais obrigatórias — `docs/referencia-telas/`
+
+**REGRA CRÍTICA:** o diretório `docs/referencia-telas/` (caminho no repositório, com `/`) é a **fonte de verdade para o design system e o visual das telas**. Os arquivos `.md` são a **fonte de verdade para conteúdo, requisitos, jornadas e funcionalidades**. Uma captura de tela jamais autoriza alterar a regra de negócio ou inventar uma função.
+
+Antes de criar ou editar uma tela/componente visual:
+
+1. Confirme que a pasta existe **na branch e no ambiente de trabalho usados**. Liste todos os arquivos e subpastas. Se não existir, não alegue tê-la consultado, registre bloqueio no estado/memória do projeto e **não invente um design alternativo como se fosse a referência**.
+2. **Abra e observe** as referências pertinentes (imagem, mockup, HTML ou outro arquivo), não apenas seus nomes. Identifique a tela/estado a que cada referência corresponde. Se houver múltiplas versões, preserve a incerteza, documente-a e selecione a versão correta com o líder técnico.
+3. Extraia um inventário de padrões reais vistos: logotipo, paleta, fonte e pesos, raios, bordas, espaçamentos, grid, dimensões, hierarquia tipográfica, sombras, ícones, hero, banners, cards, botões, entradas, rodapé, navegação, estados e responsividade. **Não invente valores exatos que não possam ser observados**; registre o que for estimado.
+4. Crie tokens comuns com Tailwind CSS (tema/variáveis CSS) **derivados das referências**. Reutilize componentes, ícones, logotipo e imagens originais quando disponíveis; não substitua arbitrariamente ícones por emojis, bibliotecas padrão ou novas imagens. Não recrie marca, hero ou banner quando existirem arquivos reutilizáveis. Se houver apenas screenshot, implemente o layout com componentes sem transformar a captura inteira numa imagem não interativa.
+5. Mantenha **fidelidade visual alta** em composição, proporções, alinhamentos, cores, tipografia, elementos decorativos, hero, banners, ícones, cards e posicionamento. As adaptações responsivas devem conservar identidade e hierarquia. Não introduza outro design system nem layouts genéricos de dashboard por conveniência.
+6. Respeite acessibilidade e as preferências do aluno. Se uma referência visual conflitar com contraste, legibilidade, sensibilidade a movimento ou operação por teclado, adote a **menor mudança acessível**, documentando a diferença. O aluno pode ter variações de apresentação, mas a estrutura e identidade do sistema permanecem reconhecíveis.
+7. **Separe visual de funcionalidade:** referências definem **como se parece**; os `.md` definem **o que deve existir, dizer e fazer**. Não inclua campos, painéis, textos ou ações sem respaldo na documentação apenas por aparecerem num mockup ilustrativo, nem elimine funcionalidades obrigatórias porque não aparecem no mockup.
+8. Antes de marcar uma tela como pronta, compare-a com sua referência correspondente em viewport semelhante (capturas lado a lado, quando possível) e registre divergências visuais relevantes, além de testar fluxo, teclas, estados vazios e erros. **Não declare "fiel à referência" sem comparação real.**
+
+Registre o mapeamento `tela → arquivo(s) de referência → componentes implementados` e eventuais exceções em `.ai/ESTADO_ATUAL.md` (ou em nota referenciada por esse arquivo). Em toda retomada, leia esse mapeamento e as referências antes de mudar qualquer UI.
 
 ## 3. Regras inegociáveis de escopo
 
@@ -63,7 +80,7 @@ Não introduza Next.js, banco de dados, Supabase, Firebase, serviços pagos, bib
 
 ## 6. Fluxo de trabalho em equipe
 
-- Antes de codar, **leia os cinco arquivos `.md`** e identifique tarefa `Txx` do backlog.
+- Antes de codar, **leia os cinco arquivos `.md`**, `.ai/RETOMADA.md` / `.ai/ESTADO_ATUAL.md` quando existirem, **e inspecione visualmente `docs/referencia-telas/`** para qualquer tarefa de interface; depois identifique a tarefa `Txx` do backlog.
 - **Uma pessoa = um dono por tarefa**. Cada agente recebe explicitamente tarefa, arquivos que pode editar e critério de aceite.
 - Trabalhar em branches curtas: `feat/T04-cadastro-aluno`, `feat/T08-hermes-texto`, `fix/T11-questoes`.
 - Não dar `push --force`, não reescrever a `main`, não alterar secretamente o trabalho de outra frente e não apagar arquivos por conveniência.
@@ -78,7 +95,7 @@ Não introduza Next.js, banco de dados, Supabase, Firebase, serviços pagos, bib
 2. Inspecionar os arquivos relevantes; não supor estrutura/pastas/serviços não existentes.
 3. Fazer a menor alteração funcional possível, sem reescrever áreas não relacionadas.
 4. Manter nomes e formatos estabelecidos em `REGRAS_DA_IA.md` (por exemplo `etapas`, `indiceCorreto`, `imagem.arquivo`).
-5. Testar caminho feliz **e um erro** (ausência de dados, imagem inexistente, JSON inválido, falha de rede).
+5. Testar caminho feliz **e um erro** (ausência de dados, imagem inexistente, JSON inválido, falha de rede). Para interface, comparar visualmente com `docs/referencia-telas/` e registrar diferenças.
 6. Executar `npm run build` e testes existentes; se falharem, relatar o erro real.
 7. Entregar o código com uma explicação simples, apropriada para quem está aprendendo a programar.
 
@@ -103,6 +120,7 @@ Ao terminar qualquer alteração, responder em português:
 - Testes: passou | falhou | não executado (justificar)
 - Dependências adicionadas: nenhuma | ... (justificar)
 - Segurança/dados: ...
+- Fidelidade visual (tarefas de interface): referência inspecionada, tela comparada, divergências: ...
 
 ### O que falta / riscos
 - ...
