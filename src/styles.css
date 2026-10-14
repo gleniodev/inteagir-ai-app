@@ -813,6 +813,50 @@ footer {
     font-size: 23px;
   }
 }
+.report-profile > .field {
+  max-width: 600px;
+}
+.app-shell main {
+  overflow-wrap: anywhere;
+}
+.tag {
+  max-width: 100%;
+}
+.content-summary {
+  white-space: pre-line;
+}
+.app-shell main {
+  position: relative;
+}
+.new-lesson-action {
+  margin: 0 0 20px;
+}
+@media (min-width: 1280px) {
+  .new-lesson-action {
+    position: absolute;
+    right: 24px;
+    top: 76px;
+    z-index: 2;
+    font-size: 19px;
+    min-height: 58px;
+    padding: 14px 25px;
+    border-radius: 18px;
+  }
+  .app-shell main:has(.new-lesson-action) .hero-art.professor {
+    margin-right: 270px;
+  }
+}
+@media (min-width: 1280px) {
+  .reports-grid.psychologist {
+    grid-template-columns: 1.45fr 0.9fr 0.9fr;
+  }
+  .reports-grid.psychologist > .space-y-5 {
+    display: contents;
+  }
+  .reports-grid.psychologist > .space-y-5 > .card {
+    margin: 0;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;

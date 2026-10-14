@@ -44,7 +44,9 @@ export default function Student() {
     );
   }
   useEffect(() => {
-    setOption(null);
+    setOption(
+      session?.respostas[session?.etapa?.chave]?.ultimaAlternativa ?? null,
+    );
     setFeedback(null);
     setHint("");
     setImageError(false);
@@ -230,15 +232,6 @@ export default function Student() {
               <p className="mt-5">
                 Avaliação registrada: {session.avaliacao ?? "Sem resposta"}
               </p>
-              <button
-                className="secondary"
-                onClick={() => {
-                  setSession(null);
-                  publications.reload();
-                }}
-              >
-                Voltar às aulas
-              </button>
             </>
           ) : session.pausada ? (
             <div className="empty">

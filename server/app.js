@@ -10,6 +10,7 @@ import { createStore } from "./services/store.js";
 import {
   studentInput,
   lessonInput,
+  lessonUpdateInput,
   generatedSubject,
   reviewInput,
   eventInput,
@@ -52,6 +53,12 @@ const publicStep = (e) => {
 };
 const safeMaterial = ({ arquivo, texto, ...m }) => m;
 const latestPrompt = (s) => s.diretrizes.at(-1);
+const contentSummary = (publication) =>
+  publication.assuntos
+    .flatMap((a) =>
+      a.etapas.filter((e) => e.tipo === "explicacao").map((e) => e.texto),
+    )
+    .join("\n\n");
 
 export async function createApp({
   dataDir = path.resolve("server/data"),
@@ -204,19 +211,31 @@ export async function createApp({
     );
   });
   app.put("/api/aulas/:id", allow("professor"), async (req, res) => {
-    const value = lessonInput.parse(req.body);
+    const value = lessonUpdateInput.parse(req.body);
     res.json(
       await store.update((s) => {
         const a = find(s.aulas, req.params.id);
-        if (s.publicacoes.some((p) => p.aulaId === a.id))
-          fail(409, "Crie uma nova aula para preservar a versão publicada.");
-        if (a.materiais.length)
+        const subjects = value.assuntos.map((v) => {
+          if (v.id && !a.assuntos.some((old) => old.id === v.id))
+            fail(400, "Assunto não pertence à aula.");
+          return { ...v, id: v.id ?? randomUUID() };
+        });
+        if (new Set(subjects.map((v) => v.id)).size !== subjects.length)
+          fail(400, "Assuntos repetidos.");
+        if (
+          s.materiais.some(
+            (m) =>
+              m.aulaId === a.id &&
+              m.assuntoId &&
+              !subjects.some((v) => v.id === m.assuntoId),
+          )
+        )
           fail(
             409,
-            "Aula com material vinculado não permite trocar assuntos. Crie uma nova aula.",
+            "Não remova assunto com material vinculado. Preserve-o ou crie outra aula.",
           );
         return Object.assign(a, value, {
-          assuntos: value.assuntos.map((v) => ({ ...v, id: randomUUID() })),
+          assuntos: subjects,
           gerados: {},
           status: "rascunho",
         });
@@ -505,18 +524,21 @@ export async function createApp({
         400,
         "Envie material e revise/preencha o texto antes de preparar a demonstração.",
       );
-    try {
-      await sharp(fixtureImage).raw().toBuffer();
-    } catch {
-      fail(
-        503,
-        "Imagem pré-gerada ausente ou inválida. A aula não pode ser publicada.",
-      );
+    let filename = null;
+    if (aluno.preferencias.estiloVisual !== "só texto") {
+      try {
+        await sharp(fixtureImage).raw().toBuffer();
+      } catch {
+        fail(
+          503,
+          "Imagem pré-gerada ausente ou inválida. A aula não pode ser publicada.",
+        );
+      }
+      const directory = path.join(mediaDir, a.id, alunoId);
+      await mkdir(directory, { recursive: true });
+      filename = `${randomUUID()}.png`;
+      await copyFile(fixtureImage, path.join(directory, filename));
     }
-    const directory = path.join(mediaDir, a.id, alunoId);
-    await mkdir(directory, { recursive: true });
-    const filename = `${randomUUID()}.png`;
-    await copyFile(fixtureImage, path.join(directory, filename));
     const generated = a.assuntos.map((assunto) => {
       const doc = fractions(
         assunto,
@@ -791,6 +813,7 @@ export async function createApp({
               if (record.correta)
                 fail(409, "Questão já respondida corretamente.");
               record.tentativas++;
+              record.ultimaAlternativa = event.alternativa;
               const correct = event.alternativa === step.indiceCorreto;
               if (record.firstTryCorrect === null)
                 record.firstTryCorrect = correct;
@@ -825,14 +848,27 @@ export async function createApp({
             titulo: p.titulo,
             disciplina: p.disciplina,
             promptBaseVersion: p.promptBaseVersion,
+            origem: p.origem,
             totalEtapas: steps(p).length,
             assuntos: p.assuntos.map((a) => a.titulo),
             totalQuestoes: p.assuntos.length * 3,
+            resumo: contentSummary(p),
           };
         });
       res.json({
         aluno,
         sessoes: sessions,
+        conteudos: s.publicacoes
+          .filter((p) => p.alunoId === aluno.id)
+          .map((p) => ({
+            publicacaoId: p.id,
+            titulo: p.titulo,
+            disciplina: p.disciplina,
+            origem: p.origem,
+            resumo: contentSummary(p),
+            totalEtapas: steps(p).length,
+            iniciada: s.sessoes.some((v) => v.publicacaoId === p.id),
+          })),
         observacoes: s.observacoes.filter((v) => v.alunoId === aluno.id),
         notas:
           req.demo.papel === "psicologo"

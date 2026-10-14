@@ -13,3 +13,7 @@ Implementação normativa: `shared/contracts.js` (Zod); JSON de geração preser
 Todos os corpos são validados; referências são conferidas no backend. Persistência única por processo com fila, temporário+fsync+rename e backup anterior. Operar somente uma instância Node por diretório de dados.
 
 Sessão inclui `revisaoEventos`, incrementada pelo servidor a cada evento novo. O frontend rejeita snapshots atrasados de revisão inferior; eventos duplicados não incrementam a revisão. Adição comunicada no checkpoint desta sessão, sem outras frentes concorrentes.
+
+`PUT /api/aulas/:id` aceita ID opcional em assuntos para preservar o vínculo existente. IDs fornecidos precisam pertencer à aula; um assunto com material específico não pode ser removido. Edição invalida apenas a prévia do rascunho; os snapshots publicados e as sessões permanecem iguais. `POST` continua gerando todos os IDs no servidor.
+
+Relatórios incluem `conteudos` com títulos, origem e resumo das explicações publicadas, mesmo antes de iniciar uma sessão; não incluem questões/gabaritos. Respostas registram `ultimaAlternativa` após a tentativa, além de acerto/ajudas/tentativas. `etapaId` no evento é a chave composta assunto/etapa (limite de 160 caracteres, compatível com IDs máximos da geração). Campos adicionados nesta sessão sob o mesmo dono LT, sem frentes concorrentes.

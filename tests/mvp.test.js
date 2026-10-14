@@ -317,6 +317,13 @@ test("fluxo local: cadastro → 2 assuntos → PDF real → contingência → re
     (await req("/media/" + l.id + "/" + a.id + "/bad.txt")).status,
     404,
   );
+  await c.role("responsavel");
+  const beforeSession = (await req("/relatorios/" + a.id)).data;
+  assert.equal(beforeSession.sessoes.length, 0);
+  assert.equal(beforeSession.conteudos.length, 1);
+  assert.equal(beforeSession.conteudos[0].iniciada, false);
+  assert.ok(beforeSession.conteudos[0].resumo.includes("quatro vagões"));
+  assert.equal(JSON.stringify(beforeSession).includes("indiceCorreto"), false);
   await c.role("aluno");
   const pubs = (await req("/publicacoes?alunoId=" + a.id)).data;
   assert.equal(pubs.length, 1);
@@ -338,7 +345,9 @@ test("fluxo local: cadastro → 2 assuntos → PDF real → contingência → re
   const duplicateId = randomUUID();
   session = (await event("avancar", {}, duplicateId)).data.sessao;
   assert.equal(session.indice, 1);
-  assert.equal((await event("avancar", {}, duplicateId)).data.repetido, true);
+  const repeated = (await event("avancar", {}, duplicateId)).data;
+  assert.equal(repeated.repetido, true);
+  assert.equal(repeated.sessao.revisaoEventos, session.revisaoEventos);
   assert.equal((await event("avancar")).status, 400);
   const helpId = randomUUID();
   await event("dica", {}, helpId);
@@ -350,6 +359,7 @@ test("fluxo local: cadastro → 2 assuntos → PDF real → contingência → re
   const correct = (await event("resposta", { alternativa: 0 })).data;
   session = correct.sessao;
   assert.equal(session.respostas[session.etapa.chave].tentativas, 2);
+  assert.equal(session.respostas[session.etapa.chave].ultimaAlternativa, 0);
   assert.equal(session.respostas[session.etapa.chave].ajudas, 1);
   session = (await event("avancar")).data.sessao;
   while (!session.concluida) {
@@ -468,4 +478,136 @@ test("contingência recusa imagem ausente e material sem leitura; provedor nunca
   const status = (await c.request("/ia/status")).data;
   assert.ok(status.adaptadores.every((v) => v.status !== "Funcionando"));
   assert.equal(status.registros[0].resultado, "falha");
+});
+
+test("preferência só texto dispensa mídia e continua validada para publicação", async (t) => {
+  const c = await context(t, {
+    fixtureImage: path.join(os.tmpdir(), randomUUID() + ".png"),
+  });
+  await c.role("cadastro");
+  const value = student();
+  value.preferencias.estiloVisual = "só texto";
+  const a = (await c.request("/alunos", "POST", value)).data;
+  await c.role("professor");
+  const l = (await c.request("/aulas", "POST", lesson())).data;
+  const m = (
+    await c.request(
+      "/materiais",
+      "POST",
+      upload(l.id, pdf(), "material.pdf", "application/pdf"),
+    )
+  ).data;
+  assert.equal(m.status, "lido");
+  const generated = await c.request(`/aulas/${l.id}/exemplo`, "POST", {
+    alunoId: a.id,
+  });
+  assert.equal(generated.status, 200);
+  for (const doc of generated.data.assuntos) {
+    assert.equal(doc.etapas[0].imagem.necessaria, false);
+    assert.equal(doc.etapas[0].imagem.arquivo, null);
+  }
+  assert.equal(
+    (
+      await c.request(`/aulas/${l.id}/publicar`, "POST", {
+        alunoId: a.id,
+        revisao: review,
+      })
+    ).status,
+    201,
+  );
+});
+
+test("origem inválida, JSON malformado e excesso de solicitações são recusados sem detalhes internos", async (t) => {
+  const c = await context(t);
+  await c.role("ia");
+  const cross = await fetch(c.base() + "/ia/testar", {
+    method: "POST",
+    headers: {
+      ...c.headers(),
+      "Content-Type": "application/json",
+      origin: "https://untrusted.example",
+    },
+    body: JSON.stringify({ tipo: "texto" }),
+  });
+  assert.equal(cross.status, 403);
+  const malformed = await fetch(c.base() + "/ia/testar", {
+    method: "POST",
+    headers: { ...c.headers(), "Content-Type": "application/json" },
+    body: "{invalid",
+  });
+  assert.equal(malformed.status, 400);
+  assert.deepEqual(await malformed.json(), { erro: "JSON inválido." });
+  for (let i = 0; i < 10; i++)
+    assert.equal(
+      (await c.request("/ia/testar", "POST", { tipo: "texto" })).status,
+      503,
+    );
+  assert.equal(
+    (await c.request("/ia/testar", "POST", { tipo: "texto" })).status,
+    429,
+  );
+});
+
+test("editar rascunho preserva IDs, vínculo de material e versão já publicada", async (t) => {
+  const c = await context(t);
+  await c.role("cadastro");
+  const a = (await c.request("/alunos", "POST", student())).data;
+  await c.role("professor");
+  const l = (await c.request("/aulas", "POST", lesson())).data;
+  const f = upload(l.id, pdf(), "material.pdf", "application/pdf");
+  f.set("assuntoId", l.assuntos[0].id);
+  const m = (await c.request("/materiais", "POST", f)).data;
+  assert.equal(m.status, "lido");
+  const draft = {
+    ...lesson(),
+    titulo: "Frações — rascunho revisado",
+    assuntos: l.assuntos,
+  };
+  const edit = await c.request("/aulas/" + l.id, "PUT", draft);
+  assert.equal(edit.status, 200);
+  assert.equal(edit.data.assuntos[0].id, l.assuntos[0].id);
+  assert.deepEqual(edit.data.materiais, [m.id]);
+  assert.equal(
+    (
+      await c.request("/aulas/" + l.id, "PUT", {
+        ...draft,
+        assuntos: [l.assuntos[1]],
+      })
+    ).status,
+    409,
+  );
+  assert.equal(
+    (
+      await c.request("/aulas/" + l.id, "PUT", {
+        ...draft,
+        assuntos: [{ ...l.assuntos[0], id: randomUUID() }, l.assuntos[1]],
+      })
+    ).status,
+    400,
+  );
+  assert.equal(
+    (await c.request(`/aulas/${l.id}/exemplo`, "POST", { alunoId: a.id }))
+      .status,
+    200,
+  );
+  assert.equal(
+    (
+      await c.request(`/aulas/${l.id}/publicar`, "POST", {
+        alunoId: a.id,
+        revisao: review,
+      })
+    ).status,
+    201,
+  );
+  assert.equal(
+    (
+      await c.request("/aulas/" + l.id, "PUT", {
+        ...draft,
+        titulo: "Novo rascunho",
+      })
+    ).status,
+    200,
+  );
+  assert.equal(c.store().read().publicacoes[0].titulo, draft.titulo);
+  assert.equal(c.store().read().aulas[0].titulo, "Novo rascunho");
 });

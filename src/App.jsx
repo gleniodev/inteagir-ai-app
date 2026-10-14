@@ -63,7 +63,8 @@ function hashArea() {
 export default function App() {
   const [area, setArea] = useState(hashArea),
     [ready, setReady] = useState(false),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [loginAttempt, setLoginAttempt] = useState(0);
   useEffect(() => {
     const fn = () => setArea(hashArea());
     addEventListener("hashchange", fn);
@@ -87,7 +88,7 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, [area]);
+  }, [area, loginAttempt]);
   const reference =
     area === "cadastro" || area === "aluno"
       ? "aluno"
@@ -165,6 +166,14 @@ export default function App() {
             </a>
           )}
           <Message error={error} />
+          {error && (
+            <button
+              className="secondary"
+              onClick={() => setLoginAttempt((v) => v + 1)}
+            >
+              Tentar novamente
+            </button>
+          )}
           {!ready && !error && <Loading />}
           {ready &&
             (area === "inicio" ? (

@@ -145,7 +145,7 @@ export default function Teacher() {
             titulo: a.titulo,
             descricao: a.descricao,
             turmaId: a.turmaId,
-            assuntos: a.assuntos.map(({ id, ...v }) => v),
+            assuntos: a.assuntos.map((v) => ({ ...v })),
           }
         : emptyLesson(discipline),
     );
@@ -198,6 +198,13 @@ export default function Teacher() {
         body: form,
       });
       setLesson(saved);
+      setForm({
+        disciplina: saved.disciplina,
+        titulo: saved.titulo,
+        descricao: saved.descricao,
+        turmaId: saved.turmaId,
+        assuntos: saved.assuntos,
+      });
       lessons.reload();
       setStage(1);
       setSuccess("Aula salva com assuntos separados.");
@@ -260,6 +267,13 @@ export default function Teacher() {
   if (!editing)
     return (
       <>
+        <button
+          className="green-button new-lesson-action"
+          onClick={() => start()}
+        >
+          <Plus size={20} />
+          Criar nova aula
+        </button>
         <div className="grid md:grid-cols-3 gap-5 mb-5">
           <div className="stat blue">
             <Users />
@@ -317,10 +331,6 @@ export default function Teacher() {
                   Nenhuma aula nesta disciplina. Crie a primeira aula.
                 </Empty>
               )}
-            <button className="green-button mt-5" onClick={() => start()}>
-              <Plus size={20} />
-              Criar nova aula
-            </button>
           </Card>
           <Card title="Minha turma" icon={Users}>
             <h3>9º ano C</h3>
@@ -577,11 +587,7 @@ export default function Teacher() {
             <Empty>Nenhum material enviado.</Empty>
           )}
           <div className="actions mt-5">
-            <button
-              className="secondary"
-              onClick={() => setStage(0)}
-              disabled={!!materials.data?.length}
-            >
+            <button className="secondary" onClick={() => setStage(0)}>
               Voltar aos assuntos
             </button>
             <button onClick={() => setStage(2)} disabled={busy}>

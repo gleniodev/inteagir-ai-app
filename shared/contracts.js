@@ -92,6 +92,12 @@ export const lessonInput = z
     assuntos: z.array(subjectInput).min(1).max(8),
   })
   .strict();
+export const lessonUpdateInput = lessonInput.extend({
+  assuntos: z
+    .array(subjectInput.extend({ id: z.string().uuid().optional() }))
+    .min(1)
+    .max(8),
+});
 const imageInput = z
   .object({
     necessaria: z.boolean(),
@@ -187,7 +193,7 @@ export const eventInput = z
       "tempo",
       "feedback",
     ]),
-    etapaId: z.string().max(80).optional(),
+    etapaId: z.string().max(160).optional(),
     alternativa: z.number().int().min(0).max(2).optional(),
     avaliacao: z
       .enum(["Gostei", "Mais ou menos", "Não gostei", "Prefiro não responder"])

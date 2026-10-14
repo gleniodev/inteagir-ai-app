@@ -37,7 +37,7 @@ self.addEventListener("fetch", (event) => {
     return;
   event.respondWith(
     fetch(event.request)
-      .then((response) => {
+      .then(async (response) => {
         if (
           response.ok &&
           (url.pathname.startsWith("/assets/") ||
@@ -45,7 +45,12 @@ self.addEventListener("fetch", (event) => {
             event.request.mode === "navigate")
         ) {
           const copy = response.clone();
-          caches.open(CACHE).then((c) => c.put(event.request, copy));
+          try {
+            const cache = await caches.open(CACHE);
+            await cache.put(event.request, copy);
+          } catch {
+            // Falha de cache não deve impedir uma resposta online válida.
+          }
         }
         return response;
       })

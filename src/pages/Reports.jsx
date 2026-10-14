@@ -104,7 +104,10 @@ export default function Reports({ psychologist }) {
   const report = useData(studentId ? `/relatorios/${studentId}` : null);
   const sessions = report.data?.sessoes ?? [];
   const completed = sessions.reduce((n, s) => n + s.indice, 0),
-    total = sessions.reduce((n, s) => n + s.totalEtapas, 0),
+    total = (report.data?.conteudos ?? []).reduce(
+      (n, c) => n + c.totalEtapas,
+      0,
+    ),
     helps = sessions.reduce(
       (n, s) =>
         n + Object.values(s.respostas).reduce((n, r) => n + r.ajudas, 0),
@@ -164,7 +167,7 @@ export default function Reports({ psychologist }) {
         <Guidelines />
       ) : (
         <>
-          <Card title="Aluno acompanhado">
+          <div className="profile-toolbar report-profile">
             <DataState {...students} retry={students.reload} />
             <StudentSelect
               students={students.data}
@@ -183,11 +186,11 @@ export default function Reports({ psychologist }) {
                 <a href="#cadastro">Cadastrar aluno</a>
               </Empty>
             )}
-          </Card>
+          </div>
           <Message error={error} success={success} />
-          {studentId && (
+          {studentId && <DataState {...report} retry={report.reload} />}
+          {studentId && report.data && (
             <>
-              <DataState {...report} retry={report.reload} />
               <div className="grid md:grid-cols-3 gap-5 my-5">
                 <div className="stat blue">
                   <BookOpen />
@@ -195,7 +198,7 @@ export default function Reports({ psychologist }) {
                     <span>
                       {psychologist
                         ? "Tempo visível aproximado"
-                        : "Atividades registradas"}
+                        : "Atividades publicadas"}
                     </span>
                     <strong>
                       {psychologist
@@ -222,7 +225,7 @@ export default function Reports({ psychologist }) {
                 </div>
               </div>
               <div
-                className={`grid ${psychologist ? "xl:grid-cols-[1.45fr_1fr]" : "xl:grid-cols-[1.35fr_1fr]"} gap-5`}
+                className={`reports-grid grid ${psychologist ? "psychologist xl:grid-cols-[1.45fr_1fr]" : "xl:grid-cols-[1.35fr_1fr]"} gap-5`}
               >
                 <Card title="O que foi estudado" icon={BookOpen}>
                   {sessions.length === 0 && (
@@ -237,6 +240,10 @@ export default function Reports({ psychologist }) {
                         {s.disciplina} — {s.titulo}
                       </h3>
                       <p>{s.assuntos.join(" · ")}</p>
+                      <details>
+                        <summary>Resumo do conteúdo publicado</summary>
+                        <p className="content-summary">{s.resumo}</p>
+                      </details>
                       <p>Início: {formatDate(s.iniciadoEm)}</p>
                       <p>
                         {s.indice} de {s.totalEtapas} etapas concluídas ·{" "}
@@ -271,13 +278,33 @@ export default function Reports({ psychologist }) {
                             ? "Pausada"
                             : "Em andamento"}
                       </Tag>
+                      <Tag>{s.origem}</Tag>
                       {psychologist && (
                         <p className="muted mt-2">
-                          Prompt-base aplicado: v{s.promptBaseVersion}
+                          Diretrizes registradas na publicação: v
+                          {s.promptBaseVersion}
                         </p>
                       )}
                     </div>
                   ))}
+                  {report.data.conteudos
+                    .filter((c) => !c.iniciada)
+                    .map((c) => (
+                      <div className="subject-panel" key={c.publicacaoId}>
+                        <h3>
+                          {c.disciplina} — {c.titulo}
+                        </h3>
+                        <p>
+                          Disponível, ainda não iniciada · {c.totalEtapas}{" "}
+                          etapas pendentes
+                        </p>
+                        <details>
+                          <summary>Resumo do conteúdo publicado</summary>
+                          <p className="content-summary">{c.resumo}</p>
+                        </details>
+                        <Tag>{c.origem}</Tag>
+                      </div>
+                    ))}
                   {psychologist && (
                     <p className="info-panel">
                       Acertos na primeira tentativa: {first}. Tempo visível é
