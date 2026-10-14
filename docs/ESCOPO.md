@@ -99,3 +99,7 @@ Conclusão aceitável para a MIC: “A plataforma conseguiu adaptar exemplos e m
 O MVP está pronto somente se uma pessoa conseguir, **no PWA**, sem editar código: criar um perfil fictício → criar aula e assunto → enviar material → gerar/recuperar adaptação → ver imagem real → aprovar → realizar três questões → abrir relatórios persistentes; e se a equipe conseguir reproduzir o percurso depois de reiniciar o backend.
 
 > **Regra de redução de escopo:** se o prazo apertar, melhorar o caminho feliz com uma disciplina e um assunto é melhor do que criar painéis completos sem um fluxo verificável. Documentar claramente qualquer item não concluído.
+
+## Regra de fidelidade visual (obrigatória)
+
+A pasta **`docs/referencia-telas/`** define a aparência das interfaces e do design system (incluindo logotipo, cores, tipografia, hero, banners, ícones e componentes). A documentação de requisitos define o conteúdo e as funcionalidades. A IA programadora deve inspecionar **as referências reais**, não apenas os nomes, reutilizar assets quando disponíveis, implementar com React + Tailwind e comparar visualmente cada tela. Em conflitos, preservar acessibilidade e regras do produto, documentando o menor desvio necessário. Se a pasta faltar na branch de trabalho, sinalizar a dependência, não inventar um novo estilo.
