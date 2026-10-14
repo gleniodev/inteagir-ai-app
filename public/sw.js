@@ -1,69 +1,45 @@
-const CACHE = "inteagir-shell-v1";
+﻿const PREFIX = "inteagir-shell-";
+const CACHE = PREFIX + "__BUILD_VERSION__";
+const SHELL_ASSETS = ["__SHELL_ASSETS__"];
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(CACHE)
-      .then((c) =>
-        c.addAll([
-          "/",
-          "/manifest.webmanifest",
-          "/icon-192.png",
-          "/icon-512.png",
-        ]),
-      ),
+    (async () => {
+      const cache = await caches.open(CACHE);
+      // Só ativa quando HTML, JS, CSS e identidade visual estão juntos.
+      await cache.addAll(SHELL_ASSETS);
+      await self.skipWaiting();
+    })(),
   );
-  self.skipWaiting();
 });
-self.addEventListener("activate", (event) =>
+self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(
-          keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)),
-        ),
-      )
-      .then(() => self.clients.claim()),
-  ),
-);
+    (async () => {
+      for (const key of await caches.keys()) {
+        if (key.startsWith(PREFIX) && key !== CACHE) await caches.delete(key);
+      }
+      await self.clients.claim();
+    })(),
+  );
+});
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
-  // Nunca armazenar API, uploads, mídia individual, respostas ou gabaritos no cache público.
-  if (
-    url.origin !== self.location.origin ||
-    url.pathname.startsWith("/api/") ||
-    event.request.method !== "GET"
-  )
+  // Apenas URLs públicas explicitamente incluídas no build usam o cache.
+  if (url.origin !== self.location.origin || event.request.method !== "GET")
     return;
+  const key =
+    event.request.mode === "navigate" && url.pathname === "/"
+      ? "/"
+      : url.search
+        ? null
+        : url.pathname;
+  if (!key || !SHELL_ASSETS.includes(key)) return;
   event.respondWith(
-    fetch(event.request)
-      .then(async (response) => {
-        if (
-          response.ok &&
-          (url.pathname.startsWith("/assets/") ||
-            url.pathname.startsWith("/references/") ||
-            event.request.mode === "navigate")
-        ) {
-          const copy = response.clone();
-          try {
-            const cache = await caches.open(CACHE);
-            await cache.put(event.request, copy);
-          } catch {
-            // Falha de cache não deve impedir uma resposta online válida.
-          }
-        }
-        return response;
-      })
-      .catch(() =>
-        caches
-          .match(event.request)
-          .then(
-            (c) =>
-              c ??
-              (event.request.mode === "navigate"
-                ? caches.match("/")
-                : Response.error()),
-          ),
-      ),
+    (async () => {
+      const cache = await caches.open(CACHE);
+      const saved = await cache.match(key);
+      // Mantém uma versão inteira; um novo build chega pela atualização do worker.
+      return saved ?? fetch(event.request);
+    })(),
   );
 });

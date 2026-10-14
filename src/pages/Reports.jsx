@@ -103,7 +103,10 @@ export default function Reports({ psychologist }) {
     [busy, setBusy] = useState(false);
   const report = useData(studentId ? `/relatorios/${studentId}` : null);
   const sessions = report.data?.sessoes ?? [];
-  const completed = sessions.reduce((n, s) => n + s.indice, 0),
+  const completed = sessions.reduce(
+      (n, s) => n + (s.etapasConcluidas ?? s.indice),
+      0,
+    ),
     total = (report.data?.conteudos ?? []).reduce(
       (n, c) => n + c.totalEtapas,
       0,
@@ -246,8 +249,10 @@ export default function Reports({ psychologist }) {
                       </details>
                       <p>Início: {formatDate(s.iniciadoEm)}</p>
                       <p>
-                        {s.indice} de {s.totalEtapas} etapas concluídas ·{" "}
-                        {s.totalEtapas - s.indice} pendentes
+                        {s.etapasConcluidas ?? s.indice} de {s.totalEtapas}{" "}
+                        etapas concluídas ·{" "}
+                        {s.totalEtapas - (s.etapasConcluidas ?? s.indice)}{" "}
+                        pendentes
                       </p>
                       <p>
                         Acertos na primeira tentativa:{" "}

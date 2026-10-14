@@ -5,6 +5,7 @@ import {
   Play,
   CircleHelp,
   ArrowRight,
+  ArrowLeft,
   CheckCircle2,
 } from "lucide-react";
 import { api } from "../services/api.js";
@@ -196,7 +197,7 @@ export default function Student() {
                 Etapa {session.indice + 1} de {session.totalEtapas}
               </p>
               <progress
-                value={session.indice}
+                value={session.etapasConcluidas ?? session.indice}
                 max={session.totalEtapas}
                 aria-label="Etapas concluídas"
               />
@@ -362,6 +363,14 @@ export default function Student() {
                   )}
                 </div>
                 <div className="actions flex-wrap">
+                  <button
+                    className="secondary"
+                    disabled={busy || session.indice === 0}
+                    onClick={() => send("voltar")}
+                  >
+                    <ArrowLeft size={18} />
+                    Voltar
+                  </button>
                   <button
                     className="secondary"
                     disabled={busy}

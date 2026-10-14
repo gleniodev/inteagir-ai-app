@@ -1,0 +1,71 @@
+{
+  "assuntos": [
+    {
+      "versaoEsquema": "1.0",
+      "assuntoId": "d6994218-ff07-4bbb-af0a-006783b5ae8b",
+      "titulo": "Frações",
+      "objetivo": "Interpretar frações",
+      "observacoesParaProfessor": [
+        "Apresentar primeiro a ilustração estática e depois as três questões, uma de cada vez. Oferecer dicas e feedback breve."
+      ],
+      "etapas": [
+        {
+          "id": "exp1",
+          "tipo": "explicacao",
+          "titulo": "Partes iguais",
+          "texto": "Uma fração mostra quantas partes iguais foram consideradas. Em 1/4, o número de baixo (4) indica o total de partes iguais; o número de cima (1) indica quantas foram escolhidas. No trem com quatro vagões iguais, um vagão azul representa 1/4 dos vagões.",
+          "imagem": {
+            "necessaria": true,
+            "pedido": "Ilustração estática e simples de um trem com exatamente quatro vagões de mesmo tamanho, alinhados e bem separados visualmente. Um vagão azul e três vagões cinza. Fundo claro, sem pessoas, sem texto, números ou símbolos.",
+            "alt": "Trem com quatro vagões iguais: um azul e três cinza. O vagão azul representa um quarto dos vagões.",
+            "arquivo": "c3f7e362-91ba-44d7-ace0-6c8281b8d211/d9266566-a491-4e8f-988c-0b3cbdf5bff2/b977c8b6-46c4-4196-8cf4-7f4bdf022262.png"
+          }
+        },
+        {
+          "id": "q1",
+          "tipo": "questao",
+          "enunciado": "No trem de quatro vagões iguais, um é azul. Que fração dos vagões é azul?",
+          "alternativas": [
+            "1/4",
+            "3/4",
+            "4/1"
+          ],
+          "indiceCorreto": 0,
+          "dica": "Conte os vagões azuis e depois o total de vagões.",
+          "feedbackAcerto": "Isso: um de quatro vagões é azul.",
+          "explicacao": "Há 1 vagão azul entre 4 vagões iguais, portanto a fração é 1/4."
+        },
+        {
+          "id": "q2",
+          "tipo": "questao",
+          "enunciado": "Na fração 3/4, o que indica o denominador 4?",
+          "alternativas": [
+            "O número de partes escolhidas",
+            "O total de partes iguais",
+            "O número de partes que sobraram"
+          ],
+          "indiceCorreto": 1,
+          "dica": "O denominador é o número de baixo.",
+          "feedbackAcerto": "Correto: são quatro partes iguais ao todo.",
+          "explicacao": "O denominador indica em quantas partes iguais o todo foi dividido."
+        },
+        {
+          "id": "q3",
+          "tipo": "questao",
+          "enunciado": "Um conjunto tem quatro vagões iguais, dos quais dois são azuis. Que fração dos vagões é azul?",
+          "alternativas": [
+            "4/2",
+            "1/4",
+            "2/4"
+          ],
+          "indiceCorreto": 2,
+          "dica": "Coloque os vagões azuis em cima e o total de vagões embaixo.",
+          "feedbackAcerto": "Certo: dois de quatro vagões.",
+          "explicacao": "São 2 vagões azuis de um total de 4; a fração é 2/4, equivalente a 1/2."
+        }
+      ]
+    }
+  ],
+  "origem": "Codex OAuth via Hermes (texto) + agy oficial (imagem)",
+  "promptBaseVersion": 1
+}

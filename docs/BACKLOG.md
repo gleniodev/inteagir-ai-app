@@ -118,3 +118,46 @@ Bloqueio real: ...
 8. Atualizar browser e reiniciar Node: dados e arquivos continuam disponíveis.
 9. Simular provedor indisponível: UI exibe falha e não apresenta mock como geração ao vivo.
 10. Registrar quais gates passaram e o que ficou para versão 2.
+
+## 9. Acompanhamento — implementação local em 14/10/2026
+
+T08/G1 — autorização real/local recebida. Runtime Hermes dedicado preparado (fonte/pins, CLI --version observado), perfil novo sem adoção de logins externos, ferramentas CLI/API vazias e segredo novo com ACL restrita. Login por dispositivo aguarda confirmação; nenhum token pessoal importado e nenhuma inferência real observada. scripts/hermes-local.js executa somente essa instância; detalhes em IA_LOCAL.md. QA de navegador/VPS permanecem adiados. Download inicial do instalador PS foi rejeitado; preparação manual auditada avançou sem executar esse instalador.
+
+Aceite mais recente: [ACEITE_LOCAL.md](ACEITE_LOCAL.md) mapeia escopo, tarefas P0, gates e testes mínimos com limites de evidência. **22/22 testes**, build e check:build passaram. Verificação adicional cobre edição de perfil e aula de História com dois assuntos/material após reinício, recusando contingência de frações indevida. MVP parcial: configuração real de texto/imagem, QA de navegador adiado e VPS/HTTPS continuam pendentes; sem expansão P1/P2.
+
+T08/T10/T14 — preparação de código, sem aceite de gates: adaptador textual HTTP Hermes/Codex desativado por padrão, com configuração explícita, preflight de ferramentas, validação de runtime/JSON, limites e erros sanitizados. Rotas usam o prompt compilado comum, geram por assunto, recusam resultado obsoleto e bloqueiam publicação com imagem necessária sem adaptador. Testes novos são dublê HTTP sem inferência real: suíte **21/21**, build e check:build passaram. Fontes/configuração pendente em IA_LOCAL.md; não houve instalação, login, chamada de conta/provedor, dependência ou gate aprovado. Dono: agente principal.
+
+T11/T12 — item 10 de REGRAS_DA_IA.md: acrescentado retorno à etapa anterior durante sessão ativa, preservando respostas, tentativas, dicas e quantidade concluída nos relatórios. Evento voltar validado e idempotente; campo etapasConcluidas opcional mantém sessões antigas compatíveis. Teste cobre primeira etapa, pausa, conclusão, repetição de evento, reinício e relatórios durante revisão. **14/14 testes**, build e check:build passaram. Referências Cadastro/Responsável/Psicólogo reabertas; UI reutiliza controles existentes. Comparação de navegador/mobile/teclado continua adiada; nenhum recurso P1/P2 acrescentado.
+
+Última validação T01/T12/T15: suíte **13/13**, build e `npm.cmd run check:build` passaram. Teste controlado de tempo verifica exclusão de pausas/ausência de pulsos e retomada após reinício; relatórios coincidem. Verificador HTTP testa build real pelo Express (10 recursos íntegros, worker, manifesto/ícones, API e caminhos privados), sem navegador. QA visual/mobile/teclado/instalação/offline real permanece adiado. Sem expansão de escopo, dependências ou UI; definição da configuração local autorizada de IA solicitada ao usuário.
+
+Continuação T07/T10: corrigida corrida da preparação do exemplo pré-gerado com edições pendentes. A leitura/validação/preparação local usa a mesma fila da gravação, preservando coerência entre objetivo, preferências, material e versão do prompt. Regressão HTTP reproduzida antes da correção e validada depois; suíte **12/12** e build passaram. Isso valida somente a contingência; aceite real T08/T09/T10 e QA de navegador continuam pendentes.
+
+Última continuação T06/T15: QA HTTP local ampliado sem navegador, conforme adiamento solicitado pelo usuário. Corrigidos cabeçalhos de proteção/no-store ausentes no limite 429 e erro genérico ao abrir material com arquivo perdido (agora JSON 404 com orientação de reenvio). Testes cobrem upload com MIME/conteúdo divergentes, arquivo acima de 5 MB, download íntegro, arquivo ausente e permissões entre áreas. `npm.cmd ci`, **11/11 testes** e build passaram. Nenhuma expansão de escopo ou UI; T15 permanece parcial por QA real, IA e VPS/HTTPS pendentes.
+
+Atualização T01: na branch `fix/T01-pwa-cache`, shell público completo pré-instalado e cache versionado por conteúdo do build; ativação preserva caches de outras aplicações. `tests/pwa.test.js` verifica offline simulado, atualização, falha de instalação e exclusão da API. Suíte 9/9 e build passaram. QA real de navegador/instalação continua pendente: acesso CUA a 127.0.0.1:5173 foi negado. VPS adiado até conclusão local conforme orientação do usuário; nenhuma expansão de escopo.
+
+Dono da sessão: agente principal (LT/BE-IA/FE, sem outras frentes ativas). Evidências: `tests/mvp.test.js`, `.ai/ESTADO_ATUAL.md` e `.ai/VISUAL.md`. A palavra “local” não comprova operação no VPS nem aprovação do LT humano.
+
+| Tarefa | Estado observado | Pendência |
+|---|---|---|
+| T00 | Inventário concluído: quatro JPEGs abertos, mapeamento e tokens estimados registrados | Fonte/ícones/assets originais e referências específicas de aula/IA ausentes |
+| T01 | Seis áreas, AppShell, build, manifesto/SW implementados; revisão visual em andamento | Validação mobile/offline/HTTPS e divergências finais |
+| T02 | Contratos 1.0 implementados e validados por Zod | Revisão do líder técnico humano antes de novas frentes |
+| T03 | Testes locais passaram: concorrência, backup, entradas inválidas, reinício | Verificação no VPS |
+| T04 | Dez perguntas; A01 salvo e recuperado por refresh no navegador | QA final de teclado/mobile |
+| T05 | Aula com dois assuntos criada no navegador e recuperada via API | QA final de UI |
+| T06 | Upload HTTP/extração de PDF reais; imagem exige texto manual, MIME/tamanho/conteúdo validados | Automação de arquivo no Chrome bloqueada por permissão da extensão; teste HTTP passou |
+| T07 | Turma 9C, seleção e prompt com versão/preferências/material e descrição geral da aula; teste confirma o campo na prévia e na chamada | Inspeção completa no PWA adiada; geração com imagem depende de backend autorizado |
+| T08/G1 | Gate textual local observado: login novo, duas respostas JSON válidas em openai-codex/gpt-6-sol, lock confirmado, zero ferramentas habilitadas | Teste do PWA adiado; VPS somente depois da conclusão local. Evidência em .ai/evidencias/ia-local-2026-10-14 |
+| G2 | CLI oficial agy 1.3.3 respondeu headless e gerou imagem local; nenhum plugin comunitário ativado | Gate completo de texto reserva/VPS e auditoria de integração pendentes |
+| T09/G3 | Experimento técnico gerou/salvou/serviu PNG real; integração agora desativada e bloqueada após auditoria das condições do agy | Definir backend de imagem autorizado; prova técnica não aprova condições de uso. Ver IA_LOCAL.md |
+| G4 | Imagem reserva Não verificado | Não existe segundo caminho testado; não anunciar fallback ativo |
+| G5 | Dois perfis fictícios produziram explicações reais diferentes, conceitos/gabaritos da amostra inspecionados | Comparação no navegador e revisão humana pendentes |
+| T07/T10 | Alterar preferências invalida só a prévia do aluno; novas diretrizes invalidam prévias pendentes. Nome/e-mail e publicações preservados; teste reproduziu e corrigiu falha | Revisão humana/QA de PWA; imagem real depende de backend autorizado |
+| T11/T12 | Renderer/questões/eventos/feedback/relatórios passam no percurso HTTP pré-gerado | QA de navegador em andamento; gates reais pendentes |
+| T13 | Observações, notas humanas e diretrizes versionadas implementadas e testadas via HTTP | Comparação/QA final no navegador |
+| T14 | Texto configurado; imagem experimental desativada/bloqueada pelas condições do provedor; estados/falhas honestos | Servidor aberto em 3001 precisa de reinício manual; revisão automática bloqueou Stop-Process. Reservas não verificadas |
+| T15 | Segurança local implementada; nenhum dado real ou segredo versionado | VPS, HTTPS, revisão pública e autorização de deploy pendentes |
+
+Não houve expansão P1/P2. Pausa e retomada mínima foram incluídas porque já são obrigatórias em TELAS_E_FLUXOS.md E02; não há sync multiusuário ou autenticação de produção. Contingência limitada a Matemática/Frações e Frações equivalentes, rotulada `Pré-gerado para demonstração`.

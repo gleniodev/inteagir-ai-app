@@ -1,7 +1,12 @@
 import { createApp } from "./app.js";
+import { configuredHermes } from "./services/hermes-text.js";
+import { configuredAgyImage } from "./services/agy-image.js";
 
 try {
-  const { app } = await createApp();
+  const { app } = await createApp({
+    textAdapter: configuredHermes(),
+    imageAdapter: configuredAgyImage(),
+  });
   const port = Number(process.env.PORT ?? 3001);
   const host = process.env.HOST ?? "127.0.0.1";
   app

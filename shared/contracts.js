@@ -188,6 +188,7 @@ export const eventInput = z
       "resposta",
       "dica",
       "avancar",
+      "voltar",
       "pausar",
       "retomar",
       "tempo",

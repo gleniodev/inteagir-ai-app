@@ -7,4 +7,5 @@ server/data/
 server/uploads/
 server/media/
 tmp/
+.local/
 *.log

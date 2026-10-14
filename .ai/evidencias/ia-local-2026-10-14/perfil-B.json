@@ -1,0 +1,136 @@
+{
+  "assuntos": [
+    {
+      "versaoEsquema": "1.0",
+      "assuntoId": "f08e9d6f-fd54-48d7-bf94-c1ce5cc22940",
+      "titulo": "Frações",
+      "objetivo": "Interpretar frações",
+      "observacoesParaProfessor": [
+        "Apresentação somente em texto, com passos explícitos, exemplos de astronomia e dicas nas questões."
+      ],
+      "etapas": [
+        {
+          "id": "explicacao-1",
+          "tipo": "explicacao",
+          "titulo": "Como interpretar uma fração",
+          "texto": "Uma fração representa partes de um todo dividido em partes iguais. Para ler uma fração, siga estes passos: 1. Observe o número de baixo, chamado denominador. Ele indica em quantas partes iguais o todo foi dividido. 2. Observe o número de cima, chamado numerador. Ele indica quantas dessas partes foram consideradas. Por exemplo, imagine um registro de observação do céu dividido em 8 intervalos de tempo iguais. Se a Lua foi observada em 3 intervalos, a fração correspondente é 3/8: o denominador 8 representa todos os intervalos iguais, e o numerador 3 representa os intervalos com observação da Lua. Se os intervalos não tiverem a mesma duração, não podemos usar essa divisão para representar diretamente 3/8 do tempo total.",
+          "imagem": {
+            "necessaria": false,
+            "pedido": "",
+            "alt": "",
+            "arquivo": null
+          }
+        },
+        {
+          "id": "questao-1",
+          "tipo": "questao",
+          "enunciado": "Uma sessão de observação foi dividida em 6 períodos de mesma duração. Um planeta ficou visível em 2 períodos. Que fração da sessão corresponde aos períodos em que ele ficou visível?",
+          "alternativas": [
+            "2/6",
+            "6/2",
+            "2/4"
+          ],
+          "indiceCorreto": 0,
+          "dica": "Conte os períodos com o planeta visível e depois o total de períodos iguais.",
+          "feedbackAcerto": "Correto: 2 dos 6 períodos.",
+          "explicacao": "O numerador é 2, pois o planeta ficou visível em 2 períodos. O denominador é 6, pois a sessão foi dividida em 6 períodos iguais. A fração é 2/6."
+        },
+        {
+          "id": "questao-2",
+          "tipo": "questao",
+          "enunciado": "Na fração 5/9, o que indica o número 9?",
+          "alternativas": [
+            "A quantidade de partes consideradas.",
+            "A quantidade de partes iguais em que o todo foi dividido.",
+            "A quantidade de partes que faltam para completar o todo."
+          ],
+          "indiceCorreto": 1,
+          "dica": "O número de baixo é o denominador.",
+          "feedbackAcerto": "Correto: 9 indica o total de partes iguais.",
+          "explicacao": "Em 5/9, o denominador 9 indica que o todo foi dividido em 9 partes iguais. O numerador 5 indica que 5 dessas partes foram consideradas."
+        },
+        {
+          "id": "questao-3",
+          "tipo": "questao",
+          "enunciado": "Um período de observação foi dividido em 4 intervalos. Para representar 1/4 do tempo total por um desses intervalos, qual condição é necessária?",
+          "alternativas": [
+            "Os intervalos devem ter durações iguais.",
+            "Um dos intervalos deve ser mais longo que os outros.",
+            "Os intervalos podem ter qualquer duração."
+          ],
+          "indiceCorreto": 0,
+          "dica": "Pense no significado de dividir um todo em quatro partes iguais.",
+          "feedbackAcerto": "Correto: os quatro intervalos precisam ter a mesma duração.",
+          "explicacao": "A fração 1/4 indica uma de quatro partes iguais do tempo total. Se os intervalos tiverem durações diferentes, um intervalo não representará necessariamente 1/4 desse tempo."
+        }
+      ]
+    },
+    {
+      "versaoEsquema": "1.0",
+      "assuntoId": "e7de5309-83d1-4d95-b360-7175e5177471",
+      "titulo": "Frações equivalentes",
+      "objetivo": "Reconhecer frações equivalentes",
+      "observacoesParaProfessor": [
+        "Apresentação somente em texto, com passos explícitos, exemplos ligados ao espaço e feedback curto."
+      ],
+      "etapas": [
+        {
+          "id": "explicacao-1",
+          "tipo": "explicacao",
+          "titulo": "Como reconhecer frações equivalentes",
+          "texto": "Frações equivalentes representam o mesmo valor, mesmo quando seus numeradores e denominadores são diferentes. Imagine que uma nave percorreu 1/2 de uma rota. Se dividirmos cada metade da rota em duas partes iguais, ela percorreu 2 das 4 partes: 1/2 = 2/4.\n\nPara verificar pelo cálculo, siga estes passos: 1. Observe o numerador e o denominador da primeira fração. 2. Multiplique os dois pelo mesmo número não nulo. 3. Compare o resultado com a outra fração. Por exemplo, multiplicando o numerador e o denominador de 2/3 por 3, obtemos 6/9. Portanto, 2/3 e 6/9 são equivalentes. Multiplicar só o numerador ou só o denominador altera o valor da fração.",
+          "imagem": {
+            "necessaria": false,
+            "pedido": "",
+            "alt": "",
+            "arquivo": null
+          }
+        },
+        {
+          "id": "questao-1",
+          "tipo": "questao",
+          "enunciado": "Uma sonda percorreu 1/2 de sua rota. Qual fração representa a mesma parte da rota?",
+          "alternativas": [
+            "2/4",
+            "1/4",
+            "3/4"
+          ],
+          "indiceCorreto": 0,
+          "dica": "Multiplique o numerador e o denominador de 1/2 pelo mesmo número.",
+          "feedbackAcerto": "Isso: 1/2 e 2/4 representam a mesma parte.",
+          "explicacao": "Multiplicando 1 e 2 por 2, obtemos 2/4. Logo, 1/2 = 2/4."
+        },
+        {
+          "id": "questao-2",
+          "tipo": "questao",
+          "enunciado": "Qual fração é equivalente a 2/3?",
+          "alternativas": [
+            "4/9",
+            "6/9",
+            "6/12"
+          ],
+          "indiceCorreto": 1,
+          "dica": "Procure uma alternativa obtida multiplicando 2 e 3 pelo mesmo número não nulo.",
+          "feedbackAcerto": "Correto: 2/3 = 6/9.",
+          "explicacao": "Multiplicando o numerador 2 e o denominador 3 por 3, obtemos 6/9."
+        },
+        {
+          "id": "questao-3",
+          "tipo": "questao",
+          "enunciado": "Para transformar 3/5 em uma fração equivalente, qual operação mantém seu valor?",
+          "alternativas": [
+            "Multiplicar apenas o numerador por 2, obtendo 6/5.",
+            "Multiplicar apenas o denominador por 2, obtendo 3/10.",
+            "Multiplicar o numerador e o denominador por 2, obtendo 6/10."
+          ],
+          "indiceCorreto": 2,
+          "dica": "A mesma multiplicação deve ser feita nas duas partes da fração.",
+          "feedbackAcerto": "Correto: 3/5 = 6/10.",
+          "explicacao": "Ao multiplicar tanto 3 quanto 5 por 2, obtemos 6/10 sem alterar o valor de 3/5."
+        }
+      ]
+    }
+  ],
+  "origem": "Codex OAuth via Hermes (texto)",
+  "promptBaseVersion": 1
+}

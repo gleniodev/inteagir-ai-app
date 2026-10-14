@@ -1,0 +1,136 @@
+{
+  "assuntos": [
+    {
+      "versaoEsquema": "1.0",
+      "assuntoId": "f08e9d6f-fd54-48d7-bf94-c1ce5cc22940",
+      "titulo": "Frações",
+      "objetivo": "Interpretar frações",
+      "observacoesParaProfessor": [
+        "Apresentação somente em texto, com etapas curtas e dicas nas questões."
+      ],
+      "etapas": [
+        {
+          "id": "exp1",
+          "tipo": "explicacao",
+          "titulo": "Como ler uma fração",
+          "texto": "Em uma fração, o denominador indica em quantas partes iguais o todo foi dividido. O numerador indica quantas dessas partes foram consideradas. Em 3/4, o todo foi dividido em 4 partes iguais e 3 foram consideradas.",
+          "imagem": {
+            "necessaria": false,
+            "pedido": "",
+            "alt": "",
+            "arquivo": null
+          }
+        },
+        {
+          "id": "q1",
+          "tipo": "questao",
+          "enunciado": "Em 2/5, o que indica o denominador 5?",
+          "alternativas": [
+            "O todo foi dividido em 5 partes iguais.",
+            "Foram consideradas 5 partes.",
+            "O todo foi dividido em 2 partes iguais."
+          ],
+          "indiceCorreto": 0,
+          "dica": "O denominador fica abaixo da barra.",
+          "feedbackAcerto": "Isso: são 5 partes iguais.",
+          "explicacao": "O 5 indica o número de partes iguais em que o todo foi dividido."
+        },
+        {
+          "id": "q2",
+          "tipo": "questao",
+          "enunciado": "Um trajeto de trem foi dividido em 6 trechos iguais. Foram percorridos 4 trechos. Que fração do trajeto foi percorrida?",
+          "alternativas": [
+            "6/4",
+            "4/6",
+            "4/10"
+          ],
+          "indiceCorreto": 1,
+          "dica": "Escreva os trechos percorridos sobre o total de trechos iguais.",
+          "feedbackAcerto": "Correto: 4/6 do trajeto.",
+          "explicacao": "Foram percorridos 4 dos 6 trechos iguais, portanto a fração é 4/6."
+        },
+        {
+          "id": "q3",
+          "tipo": "questao",
+          "enunciado": "Qual situação representa 3/8 de um todo?",
+          "alternativas": [
+            "Um todo dividido em 3 partes iguais, com 8 consideradas.",
+            "Um todo dividido em 8 partes de tamanhos diferentes, com 3 consideradas.",
+            "Um todo dividido em 8 partes iguais, com 3 consideradas."
+          ],
+          "indiceCorreto": 2,
+          "dica": "Confira o total de partes, as partes consideradas e se elas são iguais.",
+          "feedbackAcerto": "Isso: 3 de 8 partes iguais.",
+          "explicacao": "Em 3/8, o denominador 8 indica as partes iguais do todo; o numerador 3 indica quantas foram consideradas."
+        }
+      ]
+    },
+    {
+      "versaoEsquema": "1.0",
+      "assuntoId": "e7de5309-83d1-4d95-b360-7175e5177471",
+      "titulo": "Frações equivalentes",
+      "objetivo": "Reconhecer frações equivalentes",
+      "observacoesParaProfessor": [
+        "Apresentação somente em texto, com etapas curtas e dicas nas questões."
+      ],
+      "etapas": [
+        {
+          "id": "exp1",
+          "tipo": "explicacao",
+          "titulo": "Mesmo valor, outra escrita",
+          "texto": "Frações equivalentes representam o mesmo valor. Para encontrar uma, multiplique o numerador e o denominador pelo mesmo número não nulo. Por exemplo: 1/2 = 2/4, pois 1 × 2 = 2 e 2 × 2 = 4.",
+          "imagem": {
+            "necessaria": false,
+            "pedido": "",
+            "alt": "",
+            "arquivo": null
+          }
+        },
+        {
+          "id": "q1",
+          "tipo": "questao",
+          "enunciado": "Qual fração é equivalente a 1/2?",
+          "alternativas": [
+            "2/4",
+            "2/3",
+            "1/4"
+          ],
+          "indiceCorreto": 0,
+          "dica": "Multiplique o 1 e o 2 pelo mesmo número.",
+          "feedbackAcerto": "Correto! 1/2 = 2/4.",
+          "explicacao": "Multiplicando numerador e denominador de 1/2 por 2, obtemos 2/4."
+        },
+        {
+          "id": "q2",
+          "tipo": "questao",
+          "enunciado": "Em um trem, 3/5 dos assentos estão ocupados. Qual fração representa a mesma parte?",
+          "alternativas": [
+            "6/5",
+            "3/10",
+            "6/10"
+          ],
+          "indiceCorreto": 2,
+          "dica": "Multiplique o 3 e o 5 por 2.",
+          "feedbackAcerto": "Correto! 3/5 = 6/10.",
+          "explicacao": "Como 3 × 2 = 6 e 5 × 2 = 10, as frações 3/5 e 6/10 são equivalentes."
+        },
+        {
+          "id": "q3",
+          "tipo": "questao",
+          "enunciado": "Qual operação transforma 2/3 em uma fração equivalente?",
+          "alternativas": [
+            "Multiplicar só o numerador por 3, obtendo 6/3.",
+            "Multiplicar numerador e denominador por 3, obtendo 6/9.",
+            "Somar 3 ao numerador e ao denominador, obtendo 5/6."
+          ],
+          "indiceCorreto": 1,
+          "dica": "Use o mesmo fator não nulo nas duas partes da fração.",
+          "feedbackAcerto": "Correto! 2/3 = 6/9.",
+          "explicacao": "Multiplicar o numerador e o denominador por 3 conserva o valor: 2/3 = 6/9."
+        }
+      ]
+    }
+  ],
+  "origem": "Codex OAuth via Hermes (texto)",
+  "promptBaseVersion": 1
+}

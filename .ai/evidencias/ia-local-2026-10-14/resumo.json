@@ -1,0 +1,14 @@
+{
+  "data": "2026-10-14T13:52:52.610Z",
+  "resultado": "PNG real gerado, salvo, relido após reinício e servido íntegro por HTTP autenticado",
+  "provedorTexto": "openai-codex",
+  "modeloTexto": "gpt-6-sol",
+  "provedorImagem": "agy-oficial",
+  "modeloImagem": "Não informado pelo CLI",
+  "width": 1376,
+  "height": 768,
+  "bytes": 734252,
+  "sha256": "eaae59475dc65cd86d735e6f3417a786baea1ac4ad92bedcb0c18336bcad6445",
+  "publicacoes": 0,
+  "limites": "Sem navegador, revisão humana, fallback ou VPS; amostra visual aberta e inspecionada pelo agente."
+}
