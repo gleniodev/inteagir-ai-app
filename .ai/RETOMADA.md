@@ -1,5 +1,7 @@
 # Retomada — checkpoint consolidado em 14/10/2026
 
+**Envio remoto observado:** push da branch fix/T01-pwa-cache para origin inteagir-ai-app.git passou; upstream configurado. SHA f5d42572f8deb2e958b5df6527accf51d0d9af61 foi confirmado por git ls-remote igual ao HEAD, com árvore limpa. main permaneceu em 58beeb5. Este registro documental posterior também será enviado na mesma branch; para retomar, conferir HEAD/upstream atuais. Código/evidências estão no checkpoint 794d0b5. Sem deploy. Destino remoto não está mais pendente; permanecem os bloqueios funcionais de imagem autorizada, reinício manual e QA de navegador.
+
 **Destino resolvido pelo usuário:** usar o origin atual, https://github.com/gleniodev/inteagir-ai-app.git. Autorizado enviar a branch fix/T01-pwa-cache, sem trocar URL, alterar main ou fazer deploy. Checkpoints locais: 794d0b5 (código/evidências) e a2c21e7 (memória). A confirmação remota deve ser conferida com git ls-remote e comparada ao HEAD; as notas abaixo de destino pendente são anteriores a esta resposta.
 
 **Checkpoint local salvo:** commit de código/evidências/memória **794d0b5** na branch fix/T01-pwa-cache. Os 26 testes, build e check:build passaram novamente antes desse commit. Árvore de trabalho ficou limpa; esta nota posterior apenas registra o resultado. **Push ainda não realizado:** falta escolher o destino entre origin inteagir-ai-app.git e inteagir-ai.git. Ao retomar, usar git log/status para observar HEAD atual (pode incluir este registro documental), sem repetir as alterações já commitadas.

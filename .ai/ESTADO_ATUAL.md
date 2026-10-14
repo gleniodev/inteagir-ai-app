@@ -2,6 +2,8 @@
 
 ## Checkpoint vigente — memória consolidada antes da retomada
 
+- **Push confirmado:** fix/T01-pwa-cache enviada a origin inteagir-ai-app.git, upstream configurado e árvore limpa. git ls-remote confirmou f5d42572f8deb2e958b5df6527accf51d0d9af61 igual ao HEAD; main preservada em 58beeb5. Este registro documental posterior segue na mesma branch. Destino/envio não são mais bloqueios; não houve deploy. Para SHA final consultar Git/upstream, sem usar HEADs históricos abaixo como estado atual.
+
 - **Destino remoto confirmado pelo usuário:** usar origin atual inteagir-ai-app.git. Envio autorizado da branch fix/T01-pwa-cache; URL/main preservadas, sem deploy. Checkpoints locais 794d0b5/a2c21e7. Conferir SHA remoto igual ao HEAD após push; notas de destino pendente abaixo são históricas.
 
 - **Resultado da preparação solicitada:** código, evidências e memória commitados em **794d0b5**, branch fix/T01-pwa-cache; 26 testes/build/check:build passaram novamente e a árvore ficou limpa. Registro documental posterior pode avançar HEAD; conferir Git. **Nenhum push realizado até esta nota**, pois a definição do repositório de destino continua sem resposta. .env/.local/dados privados permaneceram excluídos. As referências a HEAD 6a66747/alterações não commitadas abaixo descrevem o estado de entrada anterior ao checkpoint.

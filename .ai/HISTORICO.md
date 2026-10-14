@@ -1,5 +1,9 @@
 # Histórico
 
+## 14/10/2026 — Push observado e verificado
+
+git push -u origin fix/T01-pwa-cache passou, criando branch remota e upstream. git ls-remote confirmou SHA f5d42572f8deb2e958b5df6527accf51d0d9af61 igual ao HEAD; árvore limpa e main remota mantida em 58beeb5. Este registro documental posterior também segue na branch para preservar a confirmação de envio na retomada. Sem deploy, merge ou force push; segredos/perfis/dados privados continuam excluídos. Última validação de código continua 26/26 testes, build e check:build; atualizações posteriores foram só documentais.
+
 ## 14/10/2026 — Destino remoto confirmado
 
 Usuário respondeu expressamente: usar origin atual inteagir-ai-app.git. Diferença de destino resolvida sem trocar URL. Autorizado enviar fix/T01-pwa-cache com os checkpoints locais; main e deploy permanecem fora da operação. Verificação efetiva de envio deve comparar HEAD com refs/heads/fix/T01-pwa-cache via git ls-remote.
