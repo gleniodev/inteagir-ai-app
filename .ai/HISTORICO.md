@@ -1,5 +1,9 @@
 # Histórico
 
+## 14/10/2026 — Checkpoint local 794d0b5
+
+Commit 794d0b5 criado em fix/T01-pwa-cache com as alterações acumuladas de código, testes, evidências fictícias e memória (47 arquivos). Varredura de candidatos/histórico e inspeção de seis capturas não encontraram credenciais conhecidas/padrões sensíveis ou dados reais; .env/.local/dados ignorados. 26/26 testes, build e check:build passaram novamente. Árvore limpa após commit. Push não executado: usuário autorizou atualização remota, mas destino inteagir-ai-app.git versus inteagir-ai.git ainda aguarda definição. Nenhum deploy/force push/alteração da main.
+
 ## 14/10/2026 — Preparação do checkpoint para envio solicitado
 
 Após pedir memória atualizada, usuário autorizou também atualizar remoto. Origin continua inteagir-ai-app.git, com apenas main em 58beeb5, diferente do URL inteagir-ai.git registrado. Destino solicitado por pergunta; envio aguarda definição. Conferidos 78 arquivos candidatos e quatro commits locais, sem credenciais conhecidas/padrões sensíveis; seis capturas antigas reabertas e confirmadas como demonstração fictícia, sem novo acesso ao navegador. Preparação de commit na branch fix/T01-pwa-cache preserva código, evidências e memória; nenhum deploy ou force push autorizado. Resultado final de commit/push deve ser conferido no Git, sem presumir sucesso desta preparação.

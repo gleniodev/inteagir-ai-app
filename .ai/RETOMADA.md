@@ -1,5 +1,7 @@
 # Retomada — checkpoint consolidado em 14/10/2026
 
+**Checkpoint local salvo:** commit de código/evidências/memória **794d0b5** na branch fix/T01-pwa-cache. Os 26 testes, build e check:build passaram novamente antes desse commit. Árvore de trabalho ficou limpa; esta nota posterior apenas registra o resultado. **Push ainda não realizado:** falta escolher o destino entre origin inteagir-ai-app.git e inteagir-ai.git. Ao retomar, usar git log/status para observar HEAD atual (pode incluir este registro documental), sem repetir as alterações já commitadas.
+
 **Solicitação posterior à consolidação:** usuário autorizou atualizar o remoto após salvar a memória. Origin foi consultado e tem apenas main em 58beeb5. Destino ainda aguarda resposta entre inteagir-ai-app.git (origin atual) e inteagir-ai.git; não trocar URL nem enviar antes dessa definição. Preparar checkpoint na branch fix/T01-pwa-cache, sem reescrever main, force push ou deploy. Varredura pré-envio conferiu 78 arquivos/quatro commits locais e capturas fictícias; .env/.local/dados/runtime permanecem ignorados. Após commit/push, conferir git log/status e SHA remoto para saber o que efetivamente foi enviado.
 
 ## Ler primeiro

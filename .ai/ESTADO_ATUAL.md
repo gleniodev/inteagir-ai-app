@@ -2,6 +2,8 @@
 
 ## Checkpoint vigente — memória consolidada antes da retomada
 
+- **Resultado da preparação solicitada:** código, evidências e memória commitados em **794d0b5**, branch fix/T01-pwa-cache; 26 testes/build/check:build passaram novamente e a árvore ficou limpa. Registro documental posterior pode avançar HEAD; conferir Git. **Nenhum push realizado até esta nota**, pois a definição do repositório de destino continua sem resposta. .env/.local/dados privados permaneceram excluídos. As referências a HEAD 6a66747/alterações não commitadas abaixo descrevem o estado de entrada anterior ao checkpoint.
+
 - Pedido posterior do usuário: **atualizar o remoto após consolidar memória**. Autorização de envio recebida; falta resolver destino (origin inteagir-ai-app.git versus URL anteriormente informado inteagir-ai.git). Pergunta enviada; sem resposta até esta nota. Origin consultado: somente main em 58beeb5. Checkpoint local será preparado na branch atual, sem alterar main/force push/deploy. Varredura pré-envio de 78 arquivos e quatro commits locais/capturas fictícias não encontrou credencial conhecida/padrão sensível; não inclui .env/.local/estado privado. Conferir SHA/log/status após a operação antes de afirmar push concluído.
 
 - **Ler .ai/RETOMADA.md primeiro:** resumo operacional único, com comandos e bloqueios. Usuário pediu atualizar memória para continuar depois. Objetivo global registrado como blocked, sem declaração de conclusão.
