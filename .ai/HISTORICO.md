@@ -1,5 +1,9 @@
 # Histórico
 
+## 14/10/2026 — Destino remoto confirmado
+
+Usuário respondeu expressamente: usar origin atual inteagir-ai-app.git. Diferença de destino resolvida sem trocar URL. Autorizado enviar fix/T01-pwa-cache com os checkpoints locais; main e deploy permanecem fora da operação. Verificação efetiva de envio deve comparar HEAD com refs/heads/fix/T01-pwa-cache via git ls-remote.
+
 ## 14/10/2026 — Checkpoint local 794d0b5
 
 Commit 794d0b5 criado em fix/T01-pwa-cache com as alterações acumuladas de código, testes, evidências fictícias e memória (47 arquivos). Varredura de candidatos/histórico e inspeção de seis capturas não encontraram credenciais conhecidas/padrões sensíveis ou dados reais; .env/.local/dados ignorados. 26/26 testes, build e check:build passaram novamente. Árvore limpa após commit. Push não executado: usuário autorizou atualização remota, mas destino inteagir-ai-app.git versus inteagir-ai.git ainda aguarda definição. Nenhum deploy/force push/alteração da main.
