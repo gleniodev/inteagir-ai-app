@@ -8,6 +8,8 @@ services:
     init: true
     restart: unless-stopped
     env_file: /opt/inteagir-ai/runtime.env
+    environment:
+      INTEAGIR_TRUST_PROXY: "true"
     ports:
       - "127.0.0.1:3091:3001"
     volumes:
@@ -23,9 +25,15 @@ services:
     cpus: 2
     logging:
       driver: json-file
-      options: {max-size: "10m", max-file: "3"}
+      options: { max-size: "10m", max-file: "3" }
     healthcheck:
-      test: [CMD, node, -e, "fetch('http://127.0.0.1:3001/manifest.webmanifest').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          "fetch('http://127.0.0.1:3001/manifest.webmanifest').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
       interval: 15s
       timeout: 5s
       retries: 6

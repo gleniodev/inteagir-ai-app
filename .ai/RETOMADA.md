@@ -1,3 +1,13 @@
+## Estado vigente — 15/10/2026, deploy somente GPT/OAuth na main
+
+Usuário abandonou fallback AGY e determinou publicar todas as alterações na main. Commit 1b3e32d enviado e SHA remoto conferido; sem force/reescrita. VPS preparado em /opt/inteagir-ai, projeto/container inteagir-ai próprio, porta 127.0.0.1:3091, rede e cinco volumes exclusivos; UID10001, sem socket Docker. Oito containers anteriores preservados com os mesmos IDs. Nginx ganhou somente virtualhost do subdomínio e certificado próprio; validação nginx -t passou. Primeira emissão falhou porque webroot sob diretório privado700 não era legível; corrigido para /var/www/inteagir-ai-acme755, mantendo diretório privado700. HTTPS público200 confirmado após usuário mudar somente registro inteagir.ai para DNS sem proxy Cloudflare (proxy recusava handshake).
+
+Timer inteagir-deploy.timer ativo consulta main a cada60s com chave Git readonly exclusiva. Primeiro deploy saudável1b3e32d; automação de atualização posterior ainda em verificação. Backups antes da troca e retorno à imagem anterior no healthcheck. Fontes/versionamento em docs/DEPLOY.md e deploy/. OAuth criado novamente no VPS pelo usuário nos perfis Hermes e Codex separados, sem copiar tokens locais. Hermes27 toolsets nenhum habilitado; texto real gpt-6-sol com PDF/dois assuntos validado em /opt/inteagir-ai/verification/texto, sem publicar. Preflight Codex confirma ChatGPT e imageGeneration:true. Geração PNG combinada em andamento; flags principais ainda false até gate real. Não repetir logins já confirmados.
+
+Correção necessária para HTTPS: confiar em um único salto do Nginx somente quando INTEAGIR_TRUST_PROXY=true no container com porta restrita ao loopback; aceitar origem HTTPS própria/cookie Secure e recusar origem estrangeira. 43/43 testes e build passaram; correção aguarda deploy. `.vscode/` e scripts/agy-local.js ficaram fora do commit por serem configuração pessoal/experimento abandonado; não apagados. Nenhuma dependência npm adicionada; SSH operacional Paramiko instalado no computador e runtime Hermes/Codex instalado apenas na imagem Docker. QA visual/browser continua adiado; referência professor.jpeg reaberta, painel IA apenas remove AGY/reserva não configurada, sem novo design.
+
+As notas AGY abaixo são históricas, superadas pela decisão GPT somente. Manter OAuth sem API comercial.
+
 # Retomada — checkpoint consolidado em 14/10/2026
 
 ## Vigente — 15/10/2026, AGY login preparado/fallback bloqueado
@@ -163,3 +173,5 @@ Upload fica Enviado, texto manual opcional; uploads antigos necessita_revisao re
 - Nenhum token, .env, código de dispositivo, cookie ou dado real deve entrar em documentação/commit. Não descartar artefatos ou alterações existentes. Sem frentes concorrentes/subagentes nesta execução.
 
 Histórico da antiga nota de retomada preservado em .ai/arquivo/retomada-antes-consolidacao-2026-10-14.md; decisões e entregas anteriores em HISTORICO.md e ESTADO_ATUAL.md.
+
+Gate VPS de imagem concluído: texto + PNG real1536x1024,869253bytes, SHA256 2fdaaf94163ea4a79e71b16d03baf93befefe10f34ed3954712826941c4e18aa. HTTP mídia200, prévia validada, zero publicações; evidência privada /opt/inteagir-ai/verification/imagem. Logins exclusivos confirmados, flags de texto/imagem ativadas no runtime.env; próximo deploy carrega a configuração. Usuário reportou Origem não autorizada nos módulos; correção proxyHTTPS testada com sucesso43/43, sendo enviada na main. Não usar API keys/reserva.

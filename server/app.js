@@ -102,6 +102,7 @@ export async function createApp({
   distDir = path.resolve("dist"),
   textAdapter = null,
   imageAdapter = null,
+  trustProxy = false,
 } = {}) {
   const store = await createStore(dataDir);
   await Promise.all([
@@ -109,6 +110,8 @@ export async function createApp({
     mkdir(mediaDir, { recursive: true }),
   ]);
   const app = express();
+  // Somente no deploy: uma passagem pelo Nginx; porta Docker restrita ao host.
+  if (trustProxy) app.set("trust proxy", 1);
   app.disable("x-powered-by");
   const logins = new Map();
   const requests = new Map();

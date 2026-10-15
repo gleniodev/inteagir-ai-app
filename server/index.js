@@ -6,6 +6,7 @@ try {
   const { app } = await createApp({
     textAdapter: configuredHermes(),
     imageAdapter: configuredHermesImage(),
+    trustProxy: process.env.INTEAGIR_TRUST_PROXY === "true",
   });
   const port = Number(process.env.PORT ?? 3001);
   const host = process.env.HOST ?? "127.0.0.1";
