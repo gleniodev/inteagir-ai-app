@@ -4,6 +4,8 @@
 
 ## Referências visuais obrigatórias
 
+Solicitação adicional T20: cada item criado pode ter Excluir na área responsável, com modal de confirmação, nome/trecho do item e efeitos sobre vínculos. Cancelar não envia DELETE. Professor exclui aula/anexo/prévia/publicação; Cadastro exclui perfil; Responsável exclui sua observação; Psicólogo exclui sessão/anotação; Configuração da IA exclui registro de geração. Excluir aula remove publicações/respostas vinculadas; excluir publicação remove suas sessões; excluir perfil remove preferências/conteúdos personalizados/registros daquele aluno, preservando aulas/anexos compartilhados. Excluir anexo invalida planejamento/prévias, mantém versões publicadas. Botões não executam exclusão durante geração conflitante. Falha permanece no modal; arquivo que não pôde ser removido gera aviso explícito após exclusão do registro. Não há desfazer no aplicativo.
+
 A implementação visual **deve seguir fielmente** os arquivos disponibilizados em `docs/referencia-telas/` no repositório. Essa pasta define o **design system visual** de todas as áreas: logo, cores, fontes, espaçamento, grid, cabeçalho, hero, banners, botões, ícones, cards, ornamentos, responsividade e estética das telas. Não substituir por interface genérica, não simplificar arbitrariamente as áreas nem criar outra linguagem visual.
 
 O comportamento, conteúdo, campos e jornadas **continuam sendo definidos por este documento, `ESCOPO.md`, `REGRAS_DA_IA.md` e `BACKLOG.md`**. Mockups são referência visual, não autorização para incluir funções de cadastro, marketing ou telas sem sentido operacional. A tela visual deve ser adaptada aos conteúdos e controles corretos preservando o design.
@@ -74,7 +76,7 @@ Padrões: contraste suficiente, foco de teclado, labels em campos, tamanho de to
 - Upload de múltiplas fotos (`jpg`, `png`, `webp`) e PDFs, com limite de arquivo configurável e tipo validado no servidor.
 - Mostrar nome, tamanho, progresso e status de extração: `Enviado`, `Lido`, `Necessita revisão`, `Erro`.
 - Um material pode servir a todos os assuntos ou ser vinculado a um assunto específico.
-- PDFs pesquisáveis têm texto extraído no backend; PDFs escaneados/fotos dependem de visão/OCR ou de preparação manual. Não fingir extração bem-sucedida.
+- PDFs pesquisáveis têm texto extraído no backend; PDFs escaneados ainda exigem preparação manual no MVP. Fotos PNG/JPEG/WebP são anexadas como imagens ao pedido multimodal do Hermes durante a geração, sem transcrição manual obrigatória. Upload validado fica `Enviado`, sem alegar leitura antes da inferência; texto manual é complemento opcional. Partes ilegíveis devem gerar aviso ao professor, que revisa a aula antes de publicar.
 
 ### P04 — Etapa 3/5: turma e estudantes
 
@@ -84,13 +86,17 @@ Padrões: contraste suficiente, foco de teclado, labels em campos, tamanho de to
 
 ### P05 — Etapa 4/5: IA e geração
 
-- Exibir três blocos do prompt composto: `Diretrizes gerais`, `Informações da aula`, `Preferências do aluno`.
-- Prévia do **prompt que será enviado** (sem segredos, nomes reais ou dados clínicos).
+- Toda espera por planejamento/geração de texto/imagens deve ter overlay e modal central com spinner e frases bem-humoradas, como Colocando os pingos nos is. Animação autorizada para espera do professor, com movimento reduzido respeitado. Sem porcentagem/progresso inventado. Remover espera em sucesso/erro; testes de IA também usam esse estado. Aluno não aciona geração.
+
+- `Ver prompt` solicita análise dos materiais ao Hermes e abre somente o novo prompt criativo, organizado por assunto: compreensão dos materiais, ideia criativa, sequência da explicação, imagens, planejamento das três questões e cuidados. Não exibir o JSON bruto das fontes/diretrizes/perfil nessa página.
+- Campos editáveis e `Salvar alterações do prompt`. Mostrar versão e alterações não salvas. `Gerar aula adaptada` salva edições pendentes antes de usar essa versão; não replanejar silenciosamente o prompt revisado. Planejamento salvo é reaberto após refresh/reinício; mudanças de aula/material/perfil/diretrizes exigem nova análise. Fontes originais e regras aprovadas continuam obrigatórias na geração.
 - Botão `Gerar aula adaptada` → backend inicia processo → UI mostra estados: `Preparando material`, `Gerando texto`, `Gerando imagem`, `Validando`, `Concluído`.
-- Mostrar provedor usado e fallback se acionado (por exemplo `Codex (texto)`), sempre com estado real retornado pelo backend.
+- Nas telas de aula, prévia e relatórios, não exibir etiquetas técnicas de provedor/modelo (solicitação do usuário). Diagnósticos de provedor/fallback ficam na Configuração da IA e nos registros internos; conteúdo de contingência continua identificado como Pré-gerado para demonstração.
 - Se imagens falharem, mostrar falha e ação `Tentar novamente`; **não fabricar sucesso**. Para demo, pode haver `Usar exemplo pré-gerado`, com identificação explícita.
 
 ### P06 — Etapa 5/5: revisão e publicação
+
+- Prévia abre automaticamente em modal fullscreen responsivo, uma etapa por slide, com Anterior/Próximo e fechamento para voltar ao checklist. Avisos/gabaritos preservados. Permitir reabrir em Abrir aula em tela cheia.
 
 - Prévia real da aula do aluno, com imagem gerada, questões e gabarito visível **apenas ao professor**.
 - Checklist: conceitos corretos? imagem representa o assunto sem enganos? perguntas têm uma alternativa correta? leitura adequada? preferências respeitadas?
@@ -126,6 +132,8 @@ Cada pergunta em uma tela/cartão, `Voltar`, `Avançar`, `Prefiro não responder
 - Aluno pode acessar com seletor de perfil fictício no demo; não presumir segurança nesse seletor.
 
 ### E02 — Aula
+
+- Executar sempre em modal fullscreen responsivo, uma etapa por slide e navegação manual, sem transições automáticas. Conteúdo longo rola internamente. Fechar/Escape pausa a sessão antes de voltar à lista; falha ao salvar pausa mantém aula/erro abertos. Respostas/progresso preservados.
 
 - `Explicação`: título, texto simples, uma imagem gerada quando pedagógica, descrição acessível e botão `Próximo`.
 - `Questão`: três alternativas, uma resposta por vez; opção `Preciso de ajuda` e `Tentar novamente`. Feedback sem sons, punições, temporizadores ou animações compulsórias.

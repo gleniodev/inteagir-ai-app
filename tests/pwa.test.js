@@ -25,6 +25,11 @@ async function fixture(t) {
     ["/manifest.webmanifest", "{}"],
     ["/icon-192.png", "public-icon"],
     ["/icon-512.png", "public-icon"],
+    ["/logo-inteagir.webp", "public-logo"],
+    ["/symbol-inteagir.webp", "public-symbol"],
+    ["/favicon-16.png", "public-icon"],
+    ["/favicon-32.png", "public-icon"],
+    ["/apple-touch-icon.png", "public-icon"],
   ]);
   await mkdir(path.join(dir, "assets"));
   await mkdir(path.join(dir, "references"));

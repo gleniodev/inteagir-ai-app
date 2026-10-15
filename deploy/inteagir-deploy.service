@@ -1,0 +1,9 @@
+[Unit]
+Description=Atualiza somente o container InTEAgir a partir do Git
+After=docker.service network-online.target
+Wants=network-online.target
+[Service]
+Type=oneshot
+ExecStart=/opt/inteagir-ai/update.sh
+TimeoutStartSec=1800
+UMask=0077

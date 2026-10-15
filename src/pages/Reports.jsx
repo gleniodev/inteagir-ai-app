@@ -8,6 +8,7 @@ import {
   Save,
 } from "lucide-react";
 import { api } from "../services/api.js";
+import DeleteButton from "../components/DeleteButton.jsx";
 import {
   Card,
   Field,
@@ -17,6 +18,7 @@ import {
   Empty,
   StudentSelect,
   Tag,
+  ContentOrigin,
   formatDate,
 } from "../components/UI.jsx";
 
@@ -283,7 +285,16 @@ export default function Reports({ psychologist }) {
                             ? "Pausada"
                             : "Em andamento"}
                       </Tag>
-                      <Tag>{s.origem}</Tag>
+                      <ContentOrigin value={s.origem} />
+                      {psychologist && (
+                        <DeleteButton
+                          url={`/sessoes/${s.id}`}
+                          title={`registro da aula “${s.titulo}”`}
+                          description="Apaga esta sessão, respostas, conclusão e tempo registrado. O conteúdo publicado continua disponível para o aluno começar novamente."
+                          disabled={busy}
+                          onDeleted={report.reload}
+                        />
+                      )}
                       {psychologist && (
                         <p className="muted mt-2">
                           Diretrizes registradas na publicação: v
@@ -307,7 +318,7 @@ export default function Reports({ psychologist }) {
                           <summary>Resumo do conteúdo publicado</summary>
                           <p className="content-summary">{c.resumo}</p>
                         </details>
-                        <Tag>{c.origem}</Tag>
+                        <ContentOrigin value={c.origem} />
                       </div>
                     ))}
                   {psychologist && (
@@ -368,6 +379,15 @@ export default function Reports({ psychologist }) {
                           {o.origem} · {formatDate(o.criadoEm)}
                           {o.categoria && ` · ${o.categoria}`}
                         </small>
+                        {!psychologist && (
+                          <DeleteButton
+                            url={`/observacoes/${o.id}`}
+                            title="observação do responsável"
+                            description={`Apaga somente esta observação: “${o.texto.slice(0, 100)}”.`}
+                            disabled={busy}
+                            onDeleted={report.reload}
+                          />
+                        )}
                       </div>
                     ))}
                   </Card>
@@ -391,6 +411,13 @@ export default function Reports({ psychologist }) {
                           <small>
                             {n.origem} · {formatDate(n.criadoEm)}
                           </small>
+                          <DeleteButton
+                            url={`/notas/${n.id}`}
+                            title="anotação do psicólogo"
+                            description={`Apaga somente esta anotação: “${n.texto.slice(0, 100)}”.`}
+                            disabled={busy}
+                            onDeleted={report.reload}
+                          />
                         </div>
                       ))}
                     </Card>

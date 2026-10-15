@@ -1,0 +1,26 @@
+{
+  "data": "2026-10-14T19:11:52.087Z",
+  "modeloSolicitado": "gpt-6-sol",
+  "status": "Funcionando",
+  "registros": [
+    {
+      "jobId": "dbd50c42-aed5-4cf5-9403-c343dce67a07",
+      "aulaId": "77034628-f946-4dd9-8969-87e6d3dd999d",
+      "alunoId": "3facf837-fe2b-44d5-aed1-6c43f713dd67",
+      "assuntoId": "5c35f2c8-987d-44ec-ba5f-cf0ede4ae223",
+      "tipo": "texto",
+      "promptBaseVersion": 1,
+      "adaptador": "Codex OAuth via Hermes (texto)",
+      "resultado": "sucesso",
+      "criadoEm": "2026-10-14T19:11:43.595Z",
+      "duracaoMs": 8485,
+      "fallbackUsado": false,
+      "mensagem": "Texto JSON validado; revisão do professor necessária.",
+      "provedor": "openai-codex",
+      "modelo": "gpt-6-sol"
+    }
+  ],
+  "publicacoes": 0,
+  "statusImagem": "Não configurado",
+  "limite": "Verificação HTTP local; sem navegador, publicação ou revisão humana. Imagens somente quando solicitadas explicitamente."
+}

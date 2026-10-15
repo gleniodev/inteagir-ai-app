@@ -1,0 +1,8 @@
+[Unit]
+Description=Consulta atualizacoes Git do InTEAgir a cada minuto
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=60s
+Unit=inteagir-deploy.service
+[Install]
+WantedBy=timers.target

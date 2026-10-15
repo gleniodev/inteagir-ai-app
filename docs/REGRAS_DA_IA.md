@@ -12,6 +12,8 @@ Não existe “design universal para autistas”. O sistema oferece um padrão d
 
 ## 2. Entradas obrigatórias da geração
 
+Fluxo autorizado pelo usuário: primeiro analisar as entradas e produzir planejamento criativo estruturado por assunto (compreensão factual, abordagem, explicação, imagens, questões, cuidados), em chamada independente à IA via Hermes. Esse planejamento é um artefato pedagógico revisável, sem raciocínio interno. O professor pode editá-lo e salvar uma revisão. A segunda chamada produz a aula usando a revisão salva, fontes originais, diretrizes, objetivos e preferências. A edição não autoriza alterar fatos, regras de segurança ou diretrizes aprovadas; conflitos devem virar aviso para revisão. Falha da análise não pode resultar em aula fabricada. JSON final de aula permanece no contrato 1.0.
+
 | Origem | Campos mínimos | Tratamento |
 |---|---|---|
 | Professor | `disciplina`, `tituloAula`, `turma`, lista `assuntos[{id,titulo,descricao,objetivo}]` | Cada assunto gera uma unidade própria. |

@@ -17,6 +17,7 @@ import Teacher from "./pages/Teacher.jsx";
 import Student from "./pages/Student.jsx";
 import Reports from "./pages/Reports.jsx";
 import AISettings from "./pages/AISettings.jsx";
+import GenerationOverlay from "./components/GenerationOverlay.jsx";
 
 const areas = [
   ["professor", "Professor", Users],
@@ -99,6 +100,7 @@ export default function App() {
           : "professor";
   return (
     <>
+      <GenerationOverlay />
       <a
         className="skip-link"
         href="#conteudo"
@@ -110,7 +112,14 @@ export default function App() {
         Ir para o conteúdo
       </a>
       <header className="topbar">
-        <a className="brand" href="#inicio" aria-label="InTEAgir.AI — início" />
+        <a className="brand" href="#inicio" aria-label="InTEAgir.AI — início">
+          <img
+            src="/logo-inteagir.webp"
+            alt="InTEAgir.AI"
+            width="812"
+            height="268"
+          />
+        </a>
         <div className="top-meta">
           <span>
             <UserRound size={20} />

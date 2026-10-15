@@ -1,0 +1,69 @@
+{
+  "assuntos": [
+    {
+      "versaoEsquema": "1.0",
+      "assuntoId": "ee2a7e63-989d-4115-8de2-e386cca5f36b",
+      "titulo": "Exercício do material",
+      "objetivo": "Explicar o raciocínio e resolver o exercício visual",
+      "observacoesParaProfessor": [],
+      "etapas": [
+        {
+          "id": "explicacao-1",
+          "tipo": "explicacao",
+          "titulo": "Etapa 1 de 4 — Ler e calcular",
+          "texto": "O anexo pede: 17 × 6 = ? É uma multiplicação. Separe 17 em 10 + 7. Então, 10 × 6 = 60 e 7 × 6 = 42. Somando: 60 + 42 = 102. Portanto, 17 × 6 = 102. Para imaginar os seis grupos de 17, pense em seis trens com 17 lugares cada; os trens são só um exemplo, não fazem parte do enunciado.",
+          "imagem": {
+            "necessaria": false,
+            "pedido": "",
+            "alt": "",
+            "arquivo": null
+          }
+        },
+        {
+          "id": "questao-1",
+          "tipo": "questao",
+          "enunciado": "Etapa 2 de 4 — Qual operação aparece no anexo?",
+          "alternativas": [
+            "17 + 6",
+            "17 × 6",
+            "17 − 6"
+          ],
+          "indiceCorreto": 1,
+          "dica": "Observe o sinal entre 17 e 6.",
+          "feedbackAcerto": "Isso! É uma multiplicação.",
+          "explicacao": "O sinal × indica multiplicação: 17 × 6."
+        },
+        {
+          "id": "questao-2",
+          "tipo": "questao",
+          "enunciado": "Etapa 3 de 4 — Ao separar 17 em 10 + 7, qual cálculo representa 17 × 6?",
+          "alternativas": [
+            "10 × 6 + 7 × 6",
+            "10 + 7 × 6",
+            "10 × 7 + 6"
+          ],
+          "indiceCorreto": 0,
+          "dica": "Multiplique tanto o 10 quanto o 7 por 6.",
+          "feedbackAcerto": "Certo! Os dois grupos são multiplicados por 6.",
+          "explicacao": "Como 17 = 10 + 7, temos 17 × 6 = 10 × 6 + 7 × 6."
+        },
+        {
+          "id": "questao-3",
+          "tipo": "questao",
+          "enunciado": "Etapa 4 de 4 — Qual é o resultado de 17 × 6?",
+          "alternativas": [
+            "92",
+            "102",
+            "112"
+          ],
+          "indiceCorreto": 1,
+          "dica": "Some 60 e 42.",
+          "feedbackAcerto": "Correto! Você concluiu as quatro etapas.",
+          "explicacao": "10 × 6 = 60 e 7 × 6 = 42; 60 + 42 = 102."
+        }
+      ]
+    }
+  ],
+  "origem": "Codex OAuth via Hermes (texto)",
+  "promptBaseVersion": 1
+}

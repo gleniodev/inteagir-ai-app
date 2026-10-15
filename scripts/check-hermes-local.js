@@ -6,7 +6,7 @@ import { createHash } from "node:crypto";
 import sharp from "sharp";
 import { createApp } from "../server/app.js";
 import { configuredHermes } from "../server/services/hermes-text.js";
-import { configuredAgyImage } from "../server/services/agy-image.js";
+import { configuredHermesImage } from "../server/services/hermes-image.js";
 
 // Verificação real, manual e opt-in: consome a conta configurada. Nunca faz
 // login, lê credenciais pessoais, publica conteúdo ou usa o estado da demonstração.
@@ -17,7 +17,12 @@ assert.equal(
 );
 const adapter = configuredHermes();
 const withImages = process.argv.includes("--with-images");
-const imageAdapter = withImages ? configuredAgyImage() : null;
+const withVision = process.argv.includes("--with-vision");
+assert.ok(
+  !(withImages && withVision),
+  "Execute os testes de entrada e saída de imagem separadamente.",
+);
+const imageAdapter = withImages ? configuredHermesImage() : null;
 if (withImages)
   assert.ok(imageAdapter, "Ative o adaptador local de imagem explicitamente.");
 const response = await fetch(
@@ -25,9 +30,15 @@ const response = await fetch(
   {
     headers: { Authorization: `Bearer ${process.env.INTEAGIR_HERMES_TOKEN}` },
     signal: AbortSignal.timeout(10000),
+    redirect: "error",
   },
-);
-assert.equal(response.status, 200, "API local indisponível.");
+).catch(() => null);
+if (response?.status !== 200) {
+  console.error(
+    "API Hermes local indisponível ou autenticação recusada. Nenhuma inferência foi iniciada.",
+  );
+  process.exit(1);
+}
 const discovery = await response.json();
 assert.equal(discovery.platform, "api_server");
 assert.ok(Array.isArray(discovery.data));
@@ -129,6 +140,16 @@ try {
     ],
   };
   if (withImages) lessonData.assuntos = lessonData.assuntos.slice(0, 1);
+  if (withVision) {
+    lessonData.titulo = "Interpretação de exercício visual";
+    lessonData.assuntos = [
+      {
+        titulo: "Exercício do material",
+        descricao: "Leia e interprete o exercício anexado",
+        objetivo: "Explicar o raciocínio e resolver o exercício visual",
+      },
+    ];
+  }
   const lesson = await request("/aulas", "POST", lessonData);
   // PDF pesquisável sintético, sem dados pessoais.
   const content =
@@ -156,19 +177,70 @@ try {
     `trailer\n<< /Root 1 0 R /Size 6 >>\nstartxref\n${xref}\n%%EOF`;
   const form = new FormData();
   form.set("aulaId", lesson.id);
-  form.set(
-    "arquivo",
-    new Blob([pdf], { type: "application/pdf" }),
-    "material-ficticio.pdf",
-  );
+  if (withVision) {
+    // Fonte de teste sintética: os números existem somente nos pixels anexados.
+    const raster = await sharp(
+      Buffer.from(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400"><rect width="1200" height="400" fill="white"/><text x="60" y="110" font-family="Arial" font-size="48" fill="black">EXERCICIO DE MATEMATICA</text><text x="60" y="240" font-family="Arial" font-size="72" fill="black">Calcule: 17 x 6 = ?</text></svg>',
+      ),
+    )
+      .png()
+      .toBuffer();
+    await writeFile(path.join(directory, "material-visual.png"), raster);
+    form.set(
+      "arquivo",
+      new Blob([raster], { type: "image/png" }),
+      "exercicio.png",
+    );
+  } else {
+    form.set(
+      "arquivo",
+      new Blob([pdf], { type: "application/pdf" }),
+      "material-ficticio.pdf",
+    );
+  }
   await request("/materiais", "POST", form);
   console.log(
-    `Perfil fictício, aula com ${lessonData.assuntos.length} assunto(s) e PDF preparados. Iniciando inferência real…`,
+    `Perfil fictício, aula com ${lessonData.assuntos.length} assunto(s) e ${withVision ? "imagem sem transcrição" : "PDF"} preparados. Iniciando inferência real…`,
   );
+  let planning;
+  if (withVision) {
+    planning = await request(`/aulas/${lesson.id}/planejamento`, "POST", {
+      alunoId: student.id,
+    });
+    assert.match(planning.assuntos[0].compreensao, /17/);
+    assert.match(planning.assuntos[0].compreensao, /6/);
+    planning.assuntos[0].abordagem +=
+      " Apresente a explicação em passos curtos e use a decomposição distributiva.";
+    planning = await request(`/aulas/${lesson.id}/planejamento`, "PUT", {
+      alunoId: student.id,
+      ...planning,
+    });
+    assert.equal(planning.revisao, 2);
+    await writeFile(
+      path.join(directory, "planejamento.json"),
+      JSON.stringify(planning, null, 2),
+    );
+    console.log(
+      "Plano criativo produzido a partir da imagem; edição do professor salva na revisão 2.",
+    );
+  }
   const generated = await request(`/aulas/${lesson.id}/gerar`, "POST", {
     alunoId: student.id,
+    ...(planning ? { planejamentoRevisao: planning.revisao } : {}),
   });
   assert.equal(generated.assuntos.length, lessonData.assuntos.length);
+  if (withVision) {
+    assert.match(
+      JSON.stringify(generated.assuntos),
+      /102/,
+      "A aula não demonstrou a resolução do exercício presente exclusivamente na imagem.",
+    );
+    assert.match(JSON.stringify(generated.assuntos), /17/);
+    console.log(
+      "Visão real: a IA leu o exercício nos pixels e incluiu a solução 102 na aula.",
+    );
+  }
   if (withImages)
     assert.ok(
       generated.assuntos.some((s) =>

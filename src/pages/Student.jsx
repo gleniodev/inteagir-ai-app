@@ -9,6 +9,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { api } from "../services/api.js";
+import Modal from "../components/Modal.jsx";
 import {
   Card,
   Message,
@@ -16,7 +17,7 @@ import {
   DataState,
   Empty,
   StudentSelect,
-  Tag,
+  ContentOrigin,
 } from "../components/UI.jsx";
 
 export default function Student() {
@@ -34,6 +35,7 @@ export default function Student() {
     studentId ? `/publicacoes?alunoId=${studentId}` : null,
   );
   const live = useRef(session);
+  const slide = useRef(null);
   live.current = session;
   function applySession(next) {
     setSession((current) =>
@@ -53,6 +55,10 @@ export default function Student() {
     setImageError(false);
   }, [session?.indice, session?.id]);
   useEffect(() => {
+    slide.current?.focus();
+    slide.current?.scrollIntoView({ block: "start", behavior: "instant" });
+  }, [session?.indice, session?.id, session?.pausada, session?.concluida]);
+  useEffect(() => {
     if (!session?.id) return;
     let active = true,
       visibilityPaused = false;
@@ -66,7 +72,14 @@ export default function Student() {
         });
         if (active) applySession(result.sessao);
       } catch (e) {
-        if (active) setError(e.message);
+        if (active) {
+          setError(e.message);
+          if (e.status === 404) {
+            setSession(null);
+            publications.reload();
+            students.reload();
+          }
+        }
       }
     }
     const timer = setInterval(() => {
@@ -123,6 +136,11 @@ export default function Student() {
       return true;
     } catch (e) {
       setError(e.message);
+      if (e.status === 404) {
+        setSession(null);
+        publications.reload();
+        students.reload();
+      }
       return false;
     } finally {
       setBusy(false);
@@ -131,6 +149,13 @@ export default function Student() {
   const student = students.data?.find((s) => s.id === studentId);
   const step = session?.etapa;
   const answered = step && session.respostas[step.chave]?.correta;
+  async function closeLesson() {
+    if (busy) return;
+    if (!session.concluida && !session.pausada && !(await send("pausar")))
+      return;
+    setSession(null);
+    publications.reload();
+  }
   return (
     <>
       <DataState {...students} retry={students.reload} />
@@ -171,7 +196,7 @@ export default function Student() {
                 <p>
                   {p.disciplina} · Versão {p.versao}
                 </p>
-                <Tag>{p.origem}</Tag>
+                <ContentOrigin value={p.origem} />
               </div>
               <button disabled={busy} onClick={() => start(p.id)}>
                 {p.sessao?.concluida
@@ -185,227 +210,244 @@ export default function Student() {
         </Card>
       )}
       {session && (
-        <Card
-          title={session.titulo}
-          icon={BookOpen}
-          className={`mt-5 lesson ${student?.preferencias.evitar.includes("muitos elementos") ? "quiet" : ""}`}
+        <Modal
+          title="Aula em slides"
+          fullscreen
+          onClose={closeLesson}
+          closeDisabled={busy}
         >
-          <Tag>{session.origem}</Tag>
-          {!session.concluida && student?.preferencias.progresso !== "não" && (
-            <>
-              <p className="mt-4">
-                Etapa {session.indice + 1} de {session.totalEtapas}
-              </p>
-              <progress
-                value={session.etapasConcluidas ?? session.indice}
-                max={session.totalEtapas}
-                aria-label="Etapas concluídas"
-              />
-            </>
-          )}
-          {session.concluida ? (
-            <>
-              <div className="completion">
-                <CheckCircle2 size={44} />
-                <h3>
-                  Você concluiu {session.totalEtapas} de {session.totalEtapas}{" "}
-                  atividades
-                </h3>
-                <p>Como foi esta aula? Você pode preferir não responder.</p>
-              </div>
-              <div className="actions flex-wrap justify-center">
-                {[
-                  "Gostei",
-                  "Mais ou menos",
-                  "Não gostei",
-                  "Prefiro não responder",
-                ].map((v) => (
-                  <button
-                    key={v}
-                    disabled={busy}
-                    className={session.avaliacao === v ? "" : "secondary"}
-                    onClick={() => send("feedback", { avaliacao: v })}
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
-              <p className="mt-5">
-                Avaliação registrada: {session.avaliacao ?? "Sem resposta"}
-              </p>
-            </>
-          ) : session.pausada ? (
-            <div className="empty">
-              <h3>Sessão em pausa</h3>
-              <p>
-                Seu progresso está salvo. O tempo da pausa não é contado como
-                uso.
-              </p>
-              <button disabled={busy} onClick={() => send("retomar")}>
-                <Play size={18} />
-                Retomar
-              </button>
-            </div>
-          ) : (
-            step && (
+          <Card
+            title={session.titulo}
+            icon={BookOpen}
+            className={`mt-5 lesson ${student?.preferencias.evitar.includes("muitos elementos") ? "quiet" : ""}`}
+          >
+            <Message error={error} success={success} />
+            <ContentOrigin value={session.origem} />
+            {!session.concluida &&
+              student?.preferencias.progresso !== "não" && (
+                <>
+                  <p className="mt-4">
+                    Slide {session.indice + 1} de {session.totalEtapas}
+                  </p>
+                  <progress
+                    value={session.etapasConcluidas ?? session.indice}
+                    max={session.totalEtapas}
+                    aria-label="Etapas concluídas"
+                  />
+                </>
+              )}
+            {session.concluida ? (
               <>
-                <div className="lesson-content">
-                  <p className="muted">{step.assunto}</p>
-                  {step.tipo === "explicacao" ? (
-                    <>
-                      <h3>{step.titulo}</h3>
-                      <p
-                        className={
-                          student?.preferencias.texto === "curto"
-                            ? "short-text"
-                            : ""
-                        }
-                      >
-                        {step.texto}
-                      </p>
-                      {step.imagem.necessaria && (
-                        <figure>
-                          <img
-                            src={"/api/media/" + step.imagem.arquivo}
-                            alt={step.imagem.alt}
-                            onError={() => setImageError(true)}
-                            hidden={imageError}
-                          />
-                          {imageError ? (
-                            <Message error="A imagem não pôde ser carregada. Verifique a conexão e tente novamente." />
-                          ) : (
-                            <figcaption>{step.imagem.alt}</figcaption>
-                          )}
-                          {imageError && (
+                <div
+                  className="completion"
+                  role="group"
+                  aria-roledescription="slide"
+                  aria-label="Conclusão da aula"
+                >
+                  <CheckCircle2 size={44} />
+                  <h3>
+                    Você concluiu {session.totalEtapas} de {session.totalEtapas}{" "}
+                    atividades
+                  </h3>
+                  <p>Como foi esta aula? Você pode preferir não responder.</p>
+                </div>
+                <div className="actions flex-wrap justify-center">
+                  {[
+                    "Gostei",
+                    "Mais ou menos",
+                    "Não gostei",
+                    "Prefiro não responder",
+                  ].map((v) => (
+                    <button
+                      key={v}
+                      disabled={busy}
+                      className={session.avaliacao === v ? "" : "secondary"}
+                      onClick={() => send("feedback", { avaliacao: v })}
+                    >
+                      {v}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-5">
+                  Avaliação registrada: {session.avaliacao ?? "Sem resposta"}
+                </p>
+              </>
+            ) : session.pausada ? (
+              <div className="empty">
+                <h3>Sessão em pausa</h3>
+                <p>
+                  Seu progresso está salvo. O tempo da pausa não é contado como
+                  uso.
+                </p>
+                <button disabled={busy} onClick={() => send("retomar")}>
+                  <Play size={18} />
+                  Retomar
+                </button>
+              </div>
+            ) : (
+              step && (
+                <>
+                  <div
+                    className="lesson-content slide-content"
+                    ref={slide}
+                    tabIndex={-1}
+                    role="group"
+                    aria-roledescription="slide"
+                    aria-label={`Slide ${session.indice + 1} de ${session.totalEtapas}`}
+                  >
+                    <p className="muted">{step.assunto}</p>
+                    {step.tipo === "explicacao" ? (
+                      <>
+                        <h3>{step.titulo}</h3>
+                        <p
+                          className={
+                            student?.preferencias.texto === "curto"
+                              ? "short-text"
+                              : ""
+                          }
+                        >
+                          {step.texto}
+                        </p>
+                        {step.imagem.necessaria && (
+                          <figure>
+                            <img
+                              src={"/api/media/" + step.imagem.arquivo}
+                              alt={step.imagem.alt}
+                              onError={() => setImageError(true)}
+                              hidden={imageError}
+                            />
+                            {imageError ? (
+                              <Message error="A imagem não pôde ser carregada. Verifique a conexão e tente novamente." />
+                            ) : (
+                              <figcaption>{step.imagem.alt}</figcaption>
+                            )}
+                            {imageError && (
+                              <button
+                                className="secondary"
+                                onClick={() => setImageError(false)}
+                              >
+                                Tentar carregar imagem
+                              </button>
+                            )}
+                          </figure>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <fieldset>
+                          <legend>{step.enunciado}</legend>
+                          <div className="choices vertical">
+                            {step.alternativas.map((v, i) => (
+                              <label
+                                key={v}
+                                className={`choice ${option === i ? "selected" : ""}`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="resposta"
+                                  disabled={answered || busy}
+                                  checked={option === i}
+                                  onChange={() => {
+                                    setOption(i);
+                                    setFeedback(null);
+                                  }}
+                                />
+                                {v}
+                              </label>
+                            ))}
+                          </div>
+                        </fieldset>
+                        {feedback && (
+                          <div
+                            className={`message ${feedback.correta ? "success" : "info"}`}
+                            role="status"
+                          >
+                            {feedback.texto}
+                          </div>
+                        )}
+                        {answered && !feedback && (
+                          <Message success="Resposta correta salva. Você pode continuar." />
+                        )}
+                        {hint && (
+                          <div className="info-panel" role="status">
+                            Dica: {hint}
+                          </div>
+                        )}
+                        <div className="actions flex-wrap mt-5">
+                          <button
+                            className="secondary"
+                            disabled={busy}
+                            onClick={() => send("dica")}
+                          >
+                            <CircleHelp size={18} />
+                            Preciso de ajuda
+                          </button>
+                          {!answered && (
                             <button
-                              className="secondary"
-                              onClick={() => setImageError(false)}
+                              disabled={busy || option === null}
+                              onClick={() =>
+                                send("resposta", { alternativa: option })
+                              }
                             >
-                              Tentar carregar imagem
+                              Responder
                             </button>
                           )}
-                        </figure>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <fieldset>
-                        <legend>{step.enunciado}</legend>
-                        <div className="choices vertical">
-                          {step.alternativas.map((v, i) => (
-                            <label
-                              key={v}
-                              className={`choice ${option === i ? "selected" : ""}`}
+                          {feedback && !feedback.correta && (
+                            <button
+                              className="text-button"
+                              onClick={() => {
+                                setOption(null);
+                                setFeedback(null);
+                              }}
                             >
-                              <input
-                                type="radio"
-                                name="resposta"
-                                disabled={answered || busy}
-                                checked={option === i}
-                                onChange={() => {
-                                  setOption(i);
-                                  setFeedback(null);
-                                }}
-                              />
-                              {v}
-                            </label>
-                          ))}
+                              Tentar novamente
+                            </button>
+                          )}
                         </div>
-                      </fieldset>
-                      {feedback && (
-                        <div
-                          className={`message ${feedback.correta ? "success" : "info"}`}
-                          role="status"
-                        >
-                          {feedback.texto}
-                        </div>
-                      )}
-                      {answered && !feedback && (
-                        <Message success="Resposta correta salva. Você pode continuar." />
-                      )}
-                      {hint && (
-                        <div className="info-panel" role="status">
-                          Dica: {hint}
-                        </div>
-                      )}
-                      <div className="actions flex-wrap mt-5">
-                        <button
-                          className="secondary"
-                          disabled={busy}
-                          onClick={() => send("dica")}
-                        >
-                          <CircleHelp size={18} />
-                          Preciso de ajuda
-                        </button>
-                        {!answered && (
-                          <button
-                            disabled={busy || option === null}
-                            onClick={() =>
-                              send("resposta", { alternativa: option })
-                            }
-                          >
-                            Responder
-                          </button>
-                        )}
-                        {feedback && !feedback.correta && (
-                          <button
-                            className="text-button"
-                            onClick={() => {
-                              setOption(null);
-                              setFeedback(null);
-                            }}
-                          >
-                            Tentar novamente
-                          </button>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
-                <div className="actions flex-wrap">
-                  <button
-                    className="secondary"
-                    disabled={busy || session.indice === 0}
-                    onClick={() => send("voltar")}
-                  >
-                    <ArrowLeft size={18} />
-                    Voltar
-                  </button>
-                  <button
-                    className="secondary"
-                    disabled={busy}
-                    onClick={() => send("pausar")}
-                  >
-                    <Pause size={18} />
-                    Pausa
-                  </button>
-                  <button
-                    disabled={
-                      busy ||
-                      imageError ||
-                      (step.tipo === "questao" && !answered)
-                    }
-                    onClick={() => send("avancar")}
-                  >
-                    Próximo
-                    <ArrowRight size={18} />
-                  </button>
-                </div>
-              </>
-            )
-          )}
-          <button
-            className="text-button mt-5"
-            disabled={busy}
-            onClick={async () => {
-              if (!session.concluida && !session.pausada) await send("pausar");
-              setSession(null);
-              publications.reload();
-            }}
-          >
-            Voltar às aulas
-          </button>
-        </Card>
+                      </>
+                    )}
+                  </div>
+                  <div className="actions flex-wrap">
+                    <button
+                      className="secondary"
+                      disabled={busy || session.indice === 0}
+                      onClick={() => send("voltar")}
+                    >
+                      <ArrowLeft size={18} />
+                      Voltar
+                    </button>
+                    <button
+                      className="secondary"
+                      disabled={busy}
+                      onClick={() => send("pausar")}
+                    >
+                      <Pause size={18} />
+                      Pausa
+                    </button>
+                    <button
+                      disabled={
+                        busy ||
+                        imageError ||
+                        (step.tipo === "questao" && !answered)
+                      }
+                      onClick={() => send("avancar")}
+                    >
+                      Próximo
+                      <ArrowRight size={18} />
+                    </button>
+                  </div>
+                </>
+              )
+            )}
+            <button
+              className="text-button mt-5"
+              disabled={busy}
+              onClick={closeLesson}
+            >
+              Voltar às aulas
+            </button>
+          </Card>
+        </Modal>
       )}
     </>
   );

@@ -28,13 +28,15 @@ Estudantes autistas podem encontrar barreiras de compreensão, previsibilidade, 
 2. O professor abre Matemática ou História (pré-configuradas), cria uma aula e cadastra cada assunto separadamente (título e descrição).
 3. O professor envia PDF ou imagem, escolhe a turma (por exemplo, **9º ano C**) e vê somente os alunos cadastrados para essa turma no protótipo.
 4. O backend prepara o material legível e reúne: **objetivos pedagógicos + prompt-base do psicólogo + perfil do aluno + conteúdo extraído**.
-5. A geração é solicitada **na própria interface do PWA**. O Hermes executa o provedor de texto disponível e retorna JSON validável; imagens complexas são geradas como **arquivos reais** e armazenadas no VPS.
+5. A geração é solicitada **na própria interface do PWA**. Antes da aula, o Hermes usa o provedor de texto para analisar materiais e preparar um prompt criativo por assunto, considerando objetivos, diretrizes e preferências. O professor vê somente esse novo prompt organizado e pode editá-lo/salvá-lo. Depois, a aula é produzida com o planejamento revisado e as fontes originais, em JSON validável; imagens complexas são geradas como **arquivos reais** e armazenadas no VPS.
 6. O professor revisa, visualiza os avisos de conteúdo não confirmado e publica a aula individual.
 7. O aluno responde à explicação e a **três questões por assunto**, podendo pedir ajuda e informar sua opinião.
 8. Responsável e psicólogo consultam a conclusão, acertos, ajuda solicitada, tempo aproximado de sessão e observações.
 9. Dados e mídias permanecem após atualização da página e reinício normal do serviço no VPS.
 
 ## 4. Escopo obrigatório (P0)
+
+Adição autorizada pelo usuário, T20: permitir exclusão individual dos conteúdos/registros e também dos perfis fictícios de alunos. Requer confirmação com alcance da cascata, papéis existentes e preservação dos dados não vinculados. Versões publicadas só são removidas por essa ação explícita confirmada; edição e nova geração continuam preservando histórico.
 
 | Código | Entrega verificável |
 |---|---|

@@ -11,6 +11,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { api } from "../services/api.js";
+import LessonPreview from "../components/LessonPreview.jsx";
+import DeleteButton from "../components/DeleteButton.jsx";
 import {
   Card,
   Field,
@@ -19,6 +21,7 @@ import {
   DataState,
   Empty,
   Tag,
+  ContentOrigin,
   materialStatus,
   lessonStatus,
 } from "../components/UI.jsx";
@@ -38,66 +41,6 @@ const reviewKeys = [
   ["leitura", "A leitura está adequada à série"],
   ["preferencias", "As preferências foram respeitadas"],
 ];
-function Review({ data }) {
-  return (
-    <div className="space-y-5">
-      <div className="info-panel">
-        <strong>{data.origem}</strong> · Prompt-base v{data.promptBaseVersion}
-      </div>
-      {data.assuntos.map((a) => (
-        <div key={a.assuntoId}>
-          <h3>{a.titulo}</h3>
-          <p>Objetivo: {a.objetivo}</p>
-          {a.observacoesParaProfessor.map((o, i) => (
-            <p key={i} className="warning-note">
-              {o}
-            </p>
-          ))}
-          {a.etapas.map((e) => (
-            <div key={e.id} className="review-step">
-              {e.tipo === "explicacao" ? (
-                <>
-                  <h4>{e.titulo}</h4>
-                  <p>{e.texto}</p>
-                  {e.imagem.arquivo && (
-                    <figure>
-                      <img
-                        src={"/api/media/" + e.imagem.arquivo}
-                        alt={e.imagem.alt}
-                        onError={(ev) => {
-                          ev.currentTarget.hidden = true;
-                          ev.currentTarget.nextElementSibling.hidden = false;
-                        }}
-                      />
-                      <figcaption hidden role="alert">
-                        Imagem não disponível. Não publique sem verificar a
-                        mídia.
-                      </figcaption>
-                    </figure>
-                  )}
-                </>
-              ) : (
-                <>
-                  <h4>{e.enunciado}</h4>
-                  <ol type="A">
-                    {e.alternativas.map((o, i) => (
-                      <li key={o}>
-                        {o}{" "}
-                        {i === e.indiceCorreto && <strong> — Gabarito</strong>}
-                      </li>
-                    ))}
-                  </ol>
-                  <p>Dica: {e.dica}</p>
-                  <p>Explicação: {e.explicacao}</p>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}
 export default function Teacher() {
   const lessons = useData("/aulas"),
     students = useData("/alunos?turmaId=9C");
@@ -109,7 +52,9 @@ export default function Teacher() {
     [selected, setSelected] = useState([]),
     [studentId, setStudentId] = useState(""),
     [prompt, setPrompt] = useState(null),
+    [promptDirty, setPromptDirty] = useState(false),
     [preview, setPreview] = useState(null),
+    [presentationOpen, setPresentationOpen] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [success, setSuccess] = useState(""),
@@ -118,9 +63,14 @@ export default function Teacher() {
     [materialSubject, setMaterialSubject] = useState(""),
     [manual, setManual] = useState({});
   const materials = useData(lesson ? `/aulas/${lesson.id}/materiais` : null);
+  const publications = useData(
+    lesson ? `/aulas/${lesson.id}/publicacoes` : null,
+  );
   useEffect(() => {
     setPrompt(null);
+    setPromptDirty(false);
     setPreview(null);
+    setPresentationOpen(false);
     setReview({});
   }, [studentId, lesson?.id]);
   async function run(fn) {
@@ -228,20 +178,52 @@ export default function Teacher() {
   async function getPrompt() {
     await run(async () => {
       if (!studentId) throw new Error("Selecione um aluno.");
-      setPrompt(await api(`/aulas/${lesson.id}/prompt?alunoId=${studentId}`));
+      setStage(3);
+      setPrompt(null);
+      setPrompt(
+        await api(`/aulas/${lesson.id}/planejamento`, {
+          method: "POST",
+          body: { alunoId: studentId },
+        }),
+      );
+      setPromptDirty(false);
       setStage(3);
     });
+  }
+  async function savePrompt() {
+    const saved = await api(`/aulas/${lesson.id}/planejamento`, {
+      method: "PUT",
+      body: {
+        alunoId: studentId,
+        revisao: prompt.revisao,
+        assuntos: prompt.assuntos,
+      },
+    });
+    setPrompt(saved);
+    setPromptDirty(false);
+    setPreview(null);
+    return saved;
   }
   async function generate(example) {
     await run(async () => {
       setPreview(null);
       setReview({});
+      const saved = !example && promptDirty ? await savePrompt() : prompt;
       const data = await api(
         `/aulas/${lesson.id}/${example ? "exemplo" : "gerar"}`,
-        { method: "POST", body: { alunoId: studentId } },
+        {
+          method: "POST",
+          body: {
+            alunoId: studentId,
+            ...(!example && saved
+              ? { planejamentoRevisao: saved.revisao }
+              : {}),
+          },
+        },
       );
       setPreview(data);
       setStage(4);
+      setPresentationOpen(true);
       lessons.reload();
     });
   }
@@ -250,6 +232,7 @@ export default function Teacher() {
       const data = await api(`/aulas/${lesson.id}/previa?alunoId=${studentId}`);
       setPreview(data);
       setStage(4);
+      setPresentationOpen(true);
     });
   }
   async function publish() {
@@ -262,6 +245,7 @@ export default function Teacher() {
       setSuccess(
         `Versão ${pub.versao} publicada para o perfil selecionado. Abra a área Aluno para realizar as atividades.`,
       );
+      publications.reload();
     });
   }
   if (!editing)
@@ -320,9 +304,17 @@ export default function Teacher() {
                     <p>{a.assuntos.length} assuntos · 9º ano C</p>
                     <Tag>{lessonStatus[a.status]}</Tag>
                   </div>
-                  <button className="secondary" onClick={() => start(a)}>
-                    Abrir
-                  </button>
+                  <div className="actions flex-wrap">
+                    <button className="secondary" onClick={() => start(a)}>
+                      Abrir
+                    </button>
+                    <DeleteButton
+                      url={`/aulas/${a.id}`}
+                      title={`aula “${a.titulo}”`}
+                      description="Apaga esta aula, anexos, planejamentos, prévias, todas as publicações e respostas dos alunos vinculadas a ela."
+                      onDeleted={lessons.reload}
+                    />
+                  </div>
                 </div>
               ))}
             {lessons.data &&
@@ -504,8 +496,9 @@ export default function Teacher() {
       ) : stage === 1 ? (
         <Card title="Materiais da aula" icon={Upload}>
           <p>
-            PDF pesquisável tem leitura real. Fotos e PDFs escaneados precisam
-            de texto preparado pelo professor. Até 5 MB por arquivo.
+            PDF pesquisável tem leitura real. Fotos são anexadas diretamente à
+            IA; texto manual é opcional. PDFs escaneados precisam de texto
+            preparado pelo professor. Até 5 MB por arquivo.
           </p>
           <form onSubmit={upload} className="upload-panel">
             <Field label="Vincular material">
@@ -543,6 +536,18 @@ export default function Teacher() {
                 <Tag>{materialStatus[m.status]}</Tag>
               </div>
               <p>{m.mensagem}</p>
+              <DeleteButton
+                url={`/materiais/${m.id}`}
+                title={`anexo “${m.nome}”`}
+                description="Apaga o arquivo enviado e invalida os planejamentos e prévias da aula. As versões já publicadas são preservadas."
+                disabled={busy}
+                onDeleted={() => {
+                  materials.reload();
+                  setPrompt(null);
+                  setPreview(null);
+                  lessons.reload();
+                }}
+              />
               <a
                 href={`/api/materiais/${m.id}/arquivo`}
                 target="_blank"
@@ -550,7 +555,13 @@ export default function Teacher() {
               >
                 Abrir material enviado
               </a>
-              <Field label="Texto preparado ou revisado pelo professor">
+              <Field
+                label={
+                  m.mime.startsWith("image/")
+                    ? "Texto complementar (opcional para imagens)"
+                    : "Texto preparado ou revisado pelo professor"
+                }
+              >
                 <textarea
                   maxLength={50000}
                   rows={3}
@@ -653,38 +664,94 @@ export default function Teacher() {
               Voltar
             </button>
             <button disabled={!studentId || busy} onClick={getPrompt}>
-              Ver prompt
+              {busy ? "Analisando materiais…" : "Ver prompt"}
               <ArrowRight size={18} />
             </button>
           </div>
         </Card>
       ) : stage === 3 ? (
         <Card title="Prompt e geração" icon={Sparkles}>
+          {!prompt && (
+            <button disabled={busy} onClick={getPrompt}>
+              {busy ? "Analisando materiais…" : "Preparar prompt criativo"}
+            </button>
+          )}
           {prompt && (
             <>
-              <Tag>Prompt-base v{prompt.promptBaseVersion}</Tag>
+              <Tag>
+                Prompt criativo · versão {prompt.revisao}
+                {promptDirty ? " · alterações não salvas" : ""}
+              </Tag>
               <div className="prompt-panel">
-                <h3>Diretrizes gerais</h3>
-                <p>{prompt.diretrizesGerais}</p>
-                <h3>Informações da aula</h3>
-                <pre>{JSON.stringify(prompt.informacoesAula, null, 2)}</pre>
-                <h3>Preferências do aluno</h3>
-                <pre>{JSON.stringify(prompt.preferenciasAluno, null, 2)}</pre>
-                <h3>Instruções do sistema</h3>
-                <p>{prompt.instrucoesSistema}</p>
+                {prompt.assuntos.map((a, index) => (
+                  <fieldset
+                    className="subject-panel"
+                    key={a.assuntoId}
+                    disabled={busy}
+                  >
+                    <legend>
+                      {
+                        lesson.assuntos.find((s) => s.id === a.assuntoId)
+                          ?.titulo
+                      }
+                    </legend>
+                    {[
+                      ["compreensao", "Compreensão dos materiais", 6000],
+                      ["abordagem", "Ideia criativa e abordagem", 4000],
+                      ["explicacao", "Sequência da explicação", 4000],
+                      ["imagens", "Imagens e recursos visuais", 3000],
+                      ["questoes", "Planejamento das três questões", 3000],
+                      ["cuidados", "Cuidados e pontos para revisão", 3000],
+                    ].map(([key, label, max]) => (
+                      <Field key={key} label={label}>
+                        <textarea
+                          rows={4}
+                          maxLength={max}
+                          value={a[key]}
+                          onChange={(e) => {
+                            setPrompt((p) => ({
+                              ...p,
+                              assuntos: p.assuntos.map((s, i) =>
+                                i === index
+                                  ? { ...s, [key]: e.target.value }
+                                  : s,
+                              ),
+                            }));
+                            setPromptDirty(true);
+                          }}
+                        />
+                      </Field>
+                    ))}
+                  </fieldset>
+                ))}
               </div>
+              <button
+                className="secondary"
+                disabled={busy || !promptDirty}
+                onClick={() =>
+                  run(async () => {
+                    await savePrompt();
+                    setSuccess(
+                      "Prompt criativo salvo. A próxima aula usará esta versão.",
+                    );
+                  })
+                }
+              >
+                Salvar alterações do prompt
+              </button>
             </>
           )}
-          <div className="warning-note">
-            Geração ao vivo indisponível: Hermes e os provedores ainda não foram
-            configurados/verificados. Nenhum fallback está ativo.
-          </div>
+          <p className="muted">
+            Revise e edite o prompt criativo. Ao gerar, suas alterações serão
+            salvas e usadas com os materiais originais, objetivos, diretrizes e
+            preferências do aluno.
+          </p>
           <div className="actions flex-wrap">
             <button className="secondary" onClick={() => setStage(2)}>
               Voltar
             </button>
-            <button disabled={busy} onClick={() => generate(false)}>
-              Gerar aula adaptada
+            <button disabled={busy || !prompt} onClick={() => generate(false)}>
+              {busy ? "Preparando aula…" : "Gerar aula adaptada"}
             </button>
             <button
               disabled={busy}
@@ -709,7 +776,38 @@ export default function Teacher() {
         </Card>
       ) : (
         <Card title="Revisão e publicação" icon={CheckCircle2}>
-          {preview && <Review data={preview} />}
+          {preview && (
+            <>
+              <p>{preview.assuntos.length} assunto(s)</p>
+              <ContentOrigin value={preview.origem} />
+              <DeleteButton
+                url={`/aulas/${lesson.id}/previa/${studentId}`}
+                title="prévia deste aluno"
+                description="Apaga esta prévia e suas imagens sem uso. Versões já publicadas e respostas continuam disponíveis."
+                disabled={busy}
+                onDeleted={() => {
+                  setPreview(null);
+                  setReview({});
+                  setPresentationOpen(false);
+                  setStage(3);
+                  lessons.reload();
+                }}
+              />
+              <button
+                className="secondary"
+                onClick={() => setPresentationOpen(true)}
+              >
+                Abrir aula em tela cheia
+              </button>
+              {presentationOpen && (
+                <LessonPreview
+                  data={preview}
+                  title={lesson.titulo}
+                  onClose={() => setPresentationOpen(false)}
+                />
+              )}
+            </>
+          )}
           <fieldset className="subject-panel">
             <legend>Revisão obrigatória do professor</legend>
             {reviewKeys.map(([key, label]) => (
@@ -743,6 +841,33 @@ export default function Teacher() {
             Rascunho e prévia já estão salvos. Publicar cria uma versão e
             preserva as sessões anteriores.
           </p>
+        </Card>
+      )}
+      {lesson && (
+        <Card title="Publicações desta aula" className="mt-5">
+          <DataState {...publications} retry={publications.reload} />
+          {publications.data?.length === 0 && (
+            <Empty>Nenhuma versão publicada.</Empty>
+          )}
+          {publications.data?.map((p) => (
+            <div className="list-row" key={p.id}>
+              <span>
+                {students.data?.find((a) => a.id === p.alunoId)?.nome ??
+                  "Perfil fictício"}{" "}
+                · Versão {p.versao}
+              </span>
+              <DeleteButton
+                url={`/publicacoes/${p.id}`}
+                title={`publicação versão ${p.versao} de ${students.data?.find((a) => a.id === p.alunoId)?.nome ?? "perfil fictício"}`}
+                description="Retira esta versão da área do aluno e apaga a sessão, respostas e conclusão vinculadas a ela. As outras versões são preservadas."
+                disabled={busy}
+                onDeleted={() => {
+                  publications.reload();
+                  lessons.reload();
+                }}
+              />
+            </div>
+          ))}
         </Card>
       )}
     </>

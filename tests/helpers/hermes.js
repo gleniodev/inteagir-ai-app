@@ -13,6 +13,7 @@ export async function hermesServer(t) {
     model: "modelo-teste",
     beforeReply: null,
     mutate: null,
+    mutatePlanning: null,
     rawResponse: null,
     redirect: null,
   };
@@ -55,16 +56,38 @@ export async function hermesServer(t) {
         }),
       );
     if (control.rawResponse !== null) return res.end(control.rawResponse);
-    const data = JSON.parse(payload.message);
-    const doc = fractions(data.assuntoAtual, "trens");
-    if (data.prompt.preferenciasAluno?.estiloVisual === "só texto")
+    const data = JSON.parse(
+      Array.isArray(payload.message)
+        ? payload.message[0].text
+        : payload.message,
+    );
+    const planning = data.fase === "planejamento";
+    const doc = planning
+      ? {
+          assuntoId: data.assuntoAtual.id,
+          compreensao:
+            "Frações representam partes iguais. Use os materiais anexados como referência.",
+          abordagem:
+            "Use vagões de trem em partes iguais como analogia, preservando o conceito.",
+          explicacao:
+            "Explique o numerador e denominador, depois mostre equivalência.",
+          imagens:
+            "Considere a preferência visual do aluno ao propor ilustrações.",
+          questoes:
+            "Crie três questões de três alternativas com dica e gabarito.",
+          cuidados:
+            "Não diagnosticar; revisar precisão e fontes com o professor.",
+        }
+      : fractions(data.assuntoAtual, "trens");
+    if (!planning && data.prompt.preferenciasAluno?.estiloVisual === "só texto")
       doc.etapas[0].imagem = {
         necessaria: false,
         pedido: "",
         alt: "",
         arquivo: null,
       };
-    control.mutate?.(doc, data);
+    if (planning) control.mutatePlanning?.(doc, data);
+    else control.mutate?.(doc, data);
     res.end(
       JSON.stringify({
         object: "hermes.session.chat.completion",

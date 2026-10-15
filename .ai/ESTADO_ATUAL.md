@@ -1,5 +1,85 @@
 # Estado atual — 14/10/2026
 
+## Vigente — 15/10/2026, login AGY direto preparado
+
+Checks finais: preflight passou, build/check:build/diff --check passaram; suíte final 42/42 após repetição sequencial. Execução paralela inicial interrompeu módulo MVP, causa não diagnosticada. Login/fallback não realizados.
+
+scripts/agy-local.js + scripts npm agy:check/agy:login abrem cliente oficial interativo em perfil/pasta dedicados, sem prompt de inferência/chaves herdadas/leitura de tokens. agy:check passou; argumentos inválidos recusados; CLI --help observado. Não executou login nem confirmou OAuth neste turno; usuário roda npm.cmd run agy:login. Sessão pode ser reutilizada pelo keyring oficial, sem copiar credenciais.
+
+Fallback automático AGY permanece bloqueado/não configurado: FAQ oficial reconsultada mantém restrição ao agy -p encapsulado em aplicativo de terceiros nos planos pessoais. A cadeia primária→reserva já é testada, não há reserva real autorizada/modelo confirmado. Flag false/gate preservados; sem API comercial ou login enganoso. Entrega parcial, acesso permitido necessário. Sem UI/novas dependências/dados/publicação/deploy. Ver RETOMADA para checks finais.
+
+## Vigente — T00/T01, logo e ícone originais
+
+Usuário forneceu public/logo-inteagir.webp e public/symbol-inteagir.webp. App.jsx exibe img da logo original com proporção preservada; styles.css remove recorte de screenshot na marca (desktop/mobile). scripts/build-brand-icons.js usa Sharp existente no prebuild: PNG192/512 para PWA, favicon16/32 e Apple180. index.html vincula favicons/Apple; manifesto mantém caminhos192/512 agora derivados do símbolo; build/pwa.js inclui logo/símbolo/favicons/Apple no cache/hash. Verificador allowlist e fixture PWA ajustados para novos assets.
+
+Referências: pasta listada quatro JPEGs; professor.jpeg e ambos novos WebPs abertos, icon-192.png exportado observado. Mapeamento cabeçalho → logo original + professor.jpeg → App/styles; ícone → symbol original → exports públicos/manifest/index. Originalidade da marca prevalece sobre recorte aproximado anterior, conforme pedido. Sem comparação nova no navegador (adiamento mantido), QA desktop/mobile/instalação pendente. 42/42 testes, build/check:build (15 recursos) passaram, dimensões/formato dos cinco ícones confirmados. Sem dependência/API/alteração de dados/redesenho/deploy/push. Recarregar aplicativo para obter novo shell; launcher instalado pode atualizar ícone após atualização/reinstalação pelo navegador, não alegar instalação verificada.
+
+## Vigente — T20, exclusão de conteúdos/registros/perfis
+
+Verificação final: **42/42 testes, build/check:build/diff --check passaram**. Exclusão recalcula status da aula afetada. Nenhum dado do usuário foi apagado pelo agente.
+
+Usuário pediu botões de exclusão e confirmou via pergunta assíncrona incluir perfis. server/routes/deletions.js registra DELETEs confirmados por papel, cascade JSON atômica/backup existente e limpeza de arquivos que perderam referências (unlink por UUID/extensão/realpath confinados, sem recursão). remove perfil preserva aulas/anexos compartilhados; remove aula/publicação exclui sessões vinculadas; anexo invalida planos/prévias, mantém publicações. Guarda global impede geração durante exclusão e exclusão enquanto geração roda. Se limpeza falha, resposta explicita arquivosPendentes. Student trata 404 de registro removido em outra área, sai da sessão sem ficar preso na pausa. Dados reais do workspace não foram excluídos; testes usam diretórios temporários e perfis fictícios.
+
+DeleteButton/Modal reutilizados nas listas: Teacher (aula/anexo/prévia/publicações), Registration (perfil selecionado), Reports (sessões psicólogo/observações responsável/notas psicólogo), AISettings (logs). Modal identifica item/impactos/sem desfazer, Cancelar e confirmação; erro permanece, foco restaura ou volta ao main. Sem dependências/CSS novo. Corrigida legenda antiga de fotos para informar envio direto à IA e texto opcional.
+
+Referências listadas e quatro imagens abertas; inventário anterior lido. Mapeamento professor.jpeg → Teacher; aluno.jpeg → Registration; responsavel.jpeg/psicologo.jpeg → Reports; AISettings/confirmar sem mock próprio reutilizam controles/Modal existentes. Sem nova comparação/captura no navegador (adiamento mantido), teclado/mobile/fidelidade pendentes. 42/42 testes passaram, incluindo confirmação/permissões/cascatas/reinício/outros perfis/arquivos compartilhados/confinamento/concorrência; ver RETOMADA para checks finais. Sem publicação/deploy/push/inferência nova. Backend aberto requer reinício manual para carregar rotas; não encerrar processo antes bloqueado.
+
+## Vigente — etiquetas técnicas ocultadas T10/T11/T13
+
+Solicitação do usuário: retirar tags técnicas de provedor/origem das aulas, prévia e relatórios. UI.jsx ContentOrigin exibe somente Pré-gerado para demonstração, usado por Teacher/Student/Reports. Diagnósticos da Configuração da IA e dados persistidos preservam origem técnica. Referências reabertas/pasta relistada: professor.jpeg → Teacher, aluno.jpeg (cadastro, não aula) → Student, responsavel.jpeg/psicologo.jpeg → Reports; UI.jsx reutiliza Tag existente sem CSS/layout novo. Apenas remoção das etiquetas técnicas, nenhuma captura/comparação atual de navegador (QA adiado). Sem dependência/backend/contrato novo. Verificações finais em RETOMADA.
+
+## Vigente — preparação JPEG sem inflação T06/T08
+
+Verificação final: **39/39 testes, build/check:build/diff --check passaram**.
+
+Falha de anexos reproduzida: três JPEGs somavam 833.888 bytes e viravam 8.404.425 bytes PNG, ultrapassando limite de 6MB. `visual-materials.js` agora valida pixels e preserva bytes/formato adequados; rotação/resize/remoção EXIF/IPTC/XMP conserva JPEG/WebP, PNG grande tem conversão existente. Limites/arquivos originais/OAuth preservados. Quantidade, arquivo inválido/ausente, pasta ausente e soma excedida têm erros distintos sanitizados. Nenhuma imagem retorna [] sem exigir pasta.
+
+Seis conjuntos salvos revalidados; trio agora prepara 833.888 bytes. 39/39 testes passaram, com regressão sintética, orientação/metadados e limites reais. Build final em RETOMADA. Sem mudança de UI, inferência real/reenvio privado/publicação/deploy. Backend precisa reinício manual para carregar correção; anexos existentes podem ser reaproveitados. Notas abaixo históricas.
+
+## Vigente — slides fullscreen e espera T08/T10/T11
+
+Verificação final: **36/36 testes, build/check:build/diff --check passaram**, sem QA novo de navegador.
+
+LessonPreview/Modal substituem prévia em lista: fullscreen responsivo, uma etapa por slide, avisos/gabaritos/imagens/retry, abre após gerar/reabrir, fecha para checklist. Student mantém renderer/persistência no mesmo Modal; fechar/Escape só sai após pausa salva, erro permanece no modal. Native dialog/portal/foco restaurado/overflow bloqueado, 100dvh/safe area/rolagem interna, sem transição automática do aluno.
+
+generation-wait.js/api.js rastreiam POST planejamento/gerar/testar IA, finally libera espera em sucesso/erro/concorrência. App GenerationOverlay: modal central/spinner/cinco frases a cada 7s, sem progresso inventado; reduce desativa animação/alternância. Usuário autorizou animação na espera do professor. Aluno não chama geração, sem animação. Sem dependência/backend/contrato novo; 36/36 testes passaram, build passou, ver RETOMADA para final.
+
+Mapeamento: professor.jpeg → Teacher/LessonPreview/GenerationOverlay; aluno.jpeg (cadastro, não aula) → Student/Modal. Referências reabertas, pasta relistada quatro JPEGs, inventário lido; tokens navy/azul/fundo claro/cards preservados. Referências específicas de slides/espera ausentes; composição nova solicitada usa padrões existentes. Sem navegador/captura (QA adiado pelo usuário); fidelidade/teclado/viewports pendentes. Sem inferência real nova/publicação/push/deploy.
+
+## Vigente — planejamento criativo editável T07/T08
+
+Verificação final: **34/34 testes, build/check:build passaram**, incluindo identificação da revisão usada na prévia e recusa de versão antiga antes de tocar na prévia existente. Nenhuma nova captura de navegador.
+
+Fluxo solicitado implementado: primeira chamada Hermes interpreta fontes/diretrizes/perfil e cria planejamento por assunto; professor edita/salva; segunda chamada gera aula com revisão salva e fontes originais. Plano separado do contrato pedagógico, persistido por aluno com hash de contexto/revisão; recusa fontes/versões antigas e invalida prévia ao editar. Rotas POST/PUT planejamento restritas ao professor. Geração salva revisão utilizada na prévia/log. Sem dependências/API key. Duas execuções reais com imagem 17 × 6, planejamento/edição revisão 2/aula 102 + três questões; runtime OAuth confirmado. Evidência `.ai/evidencias/planejamento-criativo-2026-10-14/`. 34/34 testes passaram; build/check:build passaram (ver RETOMADA para verificação final).
+
+Mapeamento professor/Ver prompt → docs/referencia-telas/professor.jpeg → Teacher.jsx: cards, fieldsets, inputs e botões existentes, somente novo prompt em seis campos por assunto; versão/pendências/Salvar. Referência reaberta e pasta listada. Referência específica de planejamento não existe, layout deriva dos padrões comuns observados. Sem CSS/tokens/brand novos. Comparação atual no navegador/teclado/mobile permanece adiada, não aprovar fidelidade sem captura. Reinício do backend principal pelo usuário pendente; sem publicação/deploy/push. Reserva Google continua bloqueada. Notas abaixo históricas.
+
+## Vigente — imagens anexadas à IA T06/T07/T08
+
+Fotos validadas seguem com pixels ao pedido multimodal Hermes/Codex OAuth, combinadas com diretrizes/aula/preferências. Texto manual opcional, status Enviado sem alegar OCR concluído. Metadados do prompt sem base64; anexos por assunto (compartilhados a todos). Uploads antigos suportados sem apagar estado; arquivo corrompido bloqueia prévia/publicação. Até oito imagens/assunto e 6 MB preparados. PDFs escaneados mantêm preparação manual. JSON pedagógico e revisão obrigatória preservados.
+
+Visão real observada: PNG com 17 × 6 exclusivamente nos pixels gerou explicação 102 e três questões; provedor/modelo openai-codex/gpt-6-sol confirmado. Evidência `.ai/evidencias/visao-anexos-2026-10-14/`. **33/33 testes/build/check:build passaram.** Mapeamento: professor.jpeg → Teacher.jsx (texto complementar opcional), UI.jsx (Tag Enviado). Pasta relistada e referência observada; sem novos estilos/composição, comparação visual no navegador adiada, fidelidade não aprovada. Servidor principal 3001/processo 30864 exige reinício manual; não encerrado pelo agente. Sem dependência, dados reais, publicação/deploy. Reserva Google continua bloqueada. Notas abaixo históricas.
+
+## Vigente — imagem primária OpenAI pelo Hermes verificada localmente
+
+Login novo ChatGPT OAuth concluído (48187 terminal sucesso); nenhum código de dispositivo pendente. Backend/provedor `hermes-image.js` + `hermes-codex-image.py` usam o registry/ABC Hermes e o cliente oficial Codex isolado para a imagem nativa, sem copiar tokens/API key/endpoint interno direto. Configuração privada INTEAGIR_HERMES_IMAGE_ENABLED=true; default público false. Três imagens reais observadas; fluxo HTTP completo gerou texto válido e PNG 2172 × 724/803.697 bytes, serviu via HTTP e novo processo restaurou mesma prévia/bytes/hash. Amostra visual e gabaritos inspecionados pelo agente, sem publicação. Evidência `.ai/evidencias/ia-openai-oauth-2026-10-14/`.
+
+**Parcial:** reserva Nano Banana 2 não configurada por bloqueio de uso OAuth Google em aplicações de terceiros; testá-la retornou 503 e preservou prévia. Não aprovar ambos os provedores/G3 no VPS. Gateway dedicado iniciado após confirmar antigo encerrado: handle 12587, API loopback sem ferramentas (27 conjuntos). Porta 3001 ainda processo antigo 6828, imagem Não configurado na consulta real: requer reinício manual, sem Stop-Process. Uma tentativa de gravação de material falhou 500; repetição/reinício passaram, causa não diagnosticada. **32/32 testes, build/check:build/diff --check passaram na verificação final.** Perfil oficial desabilita também view_image; cancelamento recusa/interrompe ferramentas inesperadas, diagnóstico de API indisponível sanitizado. Quarta imagem real pelo registry confirmou o caminho após ajustes (841.492 bytes, cena inspecionada). Sem dependência, UI, navegador, commit/push/deploy. Detalhes na primeira seção de RETOMADA.md; notas abaixo históricas.
+
+
+Último avanço T09: `scripts/check-codex-image-local.js` prepara gate do cliente oficial com preflight OAuth/capacidade e geração nativa opcional (`--generate`). Preflight real sem login retornou `chatgpt_login_required` nas duas modalidades, sem inferência/imagem; argumentos inválidos recusados. Sucesso ainda não testado; ponte Hermes ainda ausente. Login 89546 live na última consulta, aguardando autenticação humana; não duplicar. **30/30 testes e build passaram novamente**. Objetivo completo bloqueado por login humano e pelo acesso OAuth Google não permitido para aplicações de terceiros; preservada exigência sem API comercial. Detalhes na primeira seção de RETOMADA.md.
+
+
+Atualização mais recente T09: perfil exclusivo do **cliente oficial Codex** preparado por `scripts/codex-image-local.js`, somente login ChatGPT, sem copiar credenciais pessoais/Hermes ou herdar chaves de API. Status inicial Not logged in observado; login novo iniciado e sessão exec 89546 live na última consulta, aguardando autenticação humana. Não registrar código temporário; revalidar handle/status antes de novo login. Probe local sem autenticação anuncia suporte a imagem, **sem provar geração/acesso da conta**. Lançador ainda não é adaptador/Hermes. **30/30 testes e build passaram novamente**. Detalhes, limites da rota SIWC e próximos passos em RETOMADA.md. Bloqueio Google preservado; objetivo parcial, nenhuma imagem real nova.
+
+
+## Atualização vigente — T09/T14, somente OAuth
+
+Usuário exige OpenAI primeiro e Nano Banana 2 como reserva, **sem chaves de API, somente OAuth sempre**. Sequência e registros preparados/testados em `server/services/image-fallback.js` e `server/app.js`: decodificação completa de PNG/WebP, estados separados, teste isolado do fallback, origem efetiva, tentativas sanitizadas e recusa de modelo não confirmado. **30/30 testes**, build/check:build/diff --check passaram; nenhuma dependência/UI/conta/credencial/processo alterado.
+
+Status **parcial**, sem dois provedores OAuth configurados/ativados e sem geração real nesta continuação. Composto ainda não ligado a `server/index.js`; recebe adaptadores concretos por injeção. Hermes instalado tem plugin OpenAI OAuth que usa rota interna Codex; cliente oficial Codex possui feature de imagem, mas integração autorizada/teste continuam pendentes. Nano Banana 2 por agy continua bloqueado: [FAQ oficial](https://www.antigravity.google/docs/faq/) esclarece que encapsular headless em aplicações de terceiros não é suportado em planos pessoais. Modelo da evidência antiga desconhecido. Detalhes em RETOMADA.md. Alterações locais sem commit/push/deploy; checkpoints abaixo históricos.
+
+
 ## Checkpoint vigente — memória consolidada antes da retomada
 
 - **Push confirmado:** fix/T01-pwa-cache enviada a origin inteagir-ai-app.git, upstream configurado e árvore limpa. git ls-remote confirmou f5d42572f8deb2e958b5df6527accf51d0d9af61 igual ao HEAD; main preservada em 58beeb5. Este registro documental posterior segue na mesma branch. Destino/envio não são mais bloqueios; não houve deploy. Para SHA final consultar Git/upstream, sem usar HEADs históricos abaixo como estado atual.
@@ -98,3 +178,7 @@ As notas abaixo foram preservadas para rastreabilidade. Afirmações antigas de 
 | Responsável | docs/referencia-telas/responsavel.jpeg | App.jsx, Reports.jsx, UI.jsx, styles.css | Captura desktop existente comparada; VISUAL.md |
 | Psicólogo | docs/referencia-telas/psicologo.jpeg | App.jsx, Reports.jsx, UI.jsx, styles.css | Captura desktop existente comparada; VISUAL.md |
 | Configuração IA | Sem referência própria; linguagem compartilhada | App.jsx, AISettings.jsx, UI.jsx, styles.css | Referência específica ausente; QA atual pendente |
+
+## 15/10/2026 — GPT somente e deploy T15
+
+Por solicitação do usuário, removida configuração AGY do entrypoint e comandos npm de login AGY. Painel mostra somente adaptadores disponíveis; reserva não configurada não oferece botão. Histórico experimental preservado, sem ativação. Referência professor.jpeg reaberta, padrões existentes mantidos; sem nova captura/comparação de navegador (QA adiado). Deploy/automação preparados em deploy/ e docs/DEPLOY.md, branch solicitada main. Testes 42/42 após ajuste; build/implantação em validação. Não copiar OAuth local para VPS.

@@ -12,6 +12,87 @@ import { fractions } from "../fixtures/fractions.js";
 import { hermesServer } from "./helpers/hermes.js";
 import sharp from "sharp";
 import { GenerationError } from "../server/services/hermes-text.js";
+import { createImageFallback } from "../server/services/image-fallback.js";
+
+test("T09/T14: HTTP registra reserva, testa somente fallback e bloqueia prévia se ambos falharem", async (t) => {
+  const h = await hermesServer(t);
+  const bytes = await sharp({
+    create: { width: 128, height: 96, channels: 3, background: "blue" },
+  })
+    .png()
+    .toBuffer();
+  let primaryCalls = 0,
+    fallbackCalls = 0,
+    failFallback = false;
+  const imageAdapter = createImageFallback({
+    primary: {
+      generate: async () => {
+        primaryCalls++;
+        throw new Error("private-secret");
+      },
+    },
+    fallback: {
+      generate: async () => {
+        fallbackCalls++;
+        if (failFallback) throw new Error("private-secret");
+        return { bytes, provider: "google", model: "gemini-3.1-flash-image" };
+      },
+    },
+  });
+  const c = await context(t, { textAdapter: h.adapter, imageAdapter });
+  await c.role("cadastro");
+  const a = (await c.request("/alunos", "POST", student())).data;
+  await c.role("professor");
+  const l = (await c.request("/aulas", "POST", lesson())).data;
+  await c.request(
+    "/materiais",
+    "POST",
+    upload(l.id, pdf(), "material.pdf", "application/pdf"),
+  );
+  const generated = await c.request(`/aulas/${l.id}/gerar`, "POST", {
+    alunoId: a.id,
+  });
+  assert.equal(generated.status, 200);
+  assert.equal(
+    generated.data.origem,
+    "Codex OAuth via Hermes (texto) + google (imagem)",
+  );
+  const log = c.store().read().geracoes.at(-1);
+  assert.equal(log.fallbackUsado, true);
+  assert.equal(log.provedor, "google");
+  assert.equal(log.modelo, "gemini-3.1-flash-image");
+  assert.deepEqual(
+    log.tentativas.map((a) => a.resultado),
+    ["falha", "sucesso"],
+  );
+  await c.restart();
+  await c.role("ia");
+  const count = primaryCalls;
+  const checked = await c.request("/ia/testar", "POST", { tipo: "fallback" });
+  assert.equal(checked.status, 200);
+  assert.equal(primaryCalls, count);
+  assert.equal(checked.data.registros.at(-1).fallbackUsado, true);
+  assert.equal(checked.data.adaptadores[1].status, "Falha");
+  assert.equal(checked.data.adaptadores[2].status, "Funcionando");
+  assert.ok(fallbackCalls > 0);
+  failFallback = true;
+  await c.role("professor");
+  const failed = await c.request(`/aulas/${l.id}/gerar`, "POST", {
+    alunoId: a.id,
+  });
+  assert.equal(failed.status, 503);
+  assert.equal(failed.data.erro.includes("private-secret"), false);
+  assert.equal(c.store().read().aulas[0].gerados[a.id], undefined);
+  assert.equal(c.store().read().publicacoes.length, 0);
+  assert.deepEqual(
+    c
+      .store()
+      .read()
+      .geracoes.at(-1)
+      .tentativas.map((a) => a.resultado),
+    ["falha", "falha"],
+  );
+});
 
 test("T07/T10: editar preferências invalida só a prévia do aluno; novas diretrizes invalidam prévias e preservam publicações", async (t) => {
   const h = await hermesServer(t);
@@ -219,6 +300,518 @@ const review = {
   leitura: true,
   preferencias: true,
 };
+
+test("T06/T07/T08: imagens são anexadas por assunto sem transcrição manual; arquivo corrompido bloqueia geração", async (t) => {
+  const h = await hermesServer(t);
+  const c = await context(t, { textAdapter: h.adapter });
+  const profile = student();
+  profile.preferencias.estiloVisual = "só texto";
+  await c.role("cadastro");
+  const a = (await c.request("/alunos", "POST", profile)).data;
+  await c.role("professor");
+  const l = (await c.request("/aulas", "POST", lesson())).data;
+  const bytes = await sharp({
+    create: { width: 80, height: 60, channels: 3, background: "blue" },
+  })
+    .png()
+    .toBuffer();
+  const shared = (
+    await c.request(
+      "/materiais",
+      "POST",
+      upload(l.id, bytes, "comum.png", "image/png"),
+    )
+  ).data;
+  const form = upload(l.id, bytes, "especifico.png", "image/png");
+  form.set("assuntoId", l.assuntos[1].id);
+  const specific = (await c.request("/materiais", "POST", form)).data;
+  assert.equal(shared.status, "enviado");
+  assert.match(shared.mensagem, /Texto manual é opcional/);
+  // Imagens válidas já enviadas pela versão anterior também são suportadas.
+  await c.store().update((s) => {
+    s.materiais[0].status = "necessita_revisao";
+    s.materiais[0].mensagem =
+      "Sem OCR verificado. Confira a imagem e prepare o texto manualmente.";
+  });
+  const list = (await c.request(`/aulas/${l.id}/materiais`)).data;
+  assert.equal(list[0].status, "enviado");
+  assert.doesNotMatch(list[0].mensagem, /Sem OCR/);
+  const generated = await c.request(`/aulas/${l.id}/gerar`, "POST", {
+    alunoId: a.id,
+  });
+  assert.equal(generated.status, 200);
+  assert.equal(generated.data.assuntos.length, 2);
+  const calls = h.requests.filter((r) => r.payload?.message);
+  assert.equal(calls.length, 4);
+  assert.equal(
+    JSON.parse(calls[0].payload.message[0].text).fase,
+    "planejamento",
+  );
+  for (const [index, call] of calls.slice(2).entries()) {
+    const parts = call.payload.message;
+    assert.ok(Array.isArray(parts));
+    const prompt = JSON.parse(parts[0].text).prompt;
+    assert.equal(prompt.preferenciasAluno.estiloVisual, "só texto");
+    assert.ok(prompt.promptBaseVersion);
+    assert.equal(parts.filter((p) => p.type === "image_url").length, index + 1);
+    assert.match(parts[1].text, new RegExp(shared.id));
+    if (index === 1) assert.match(parts[3].text, new RegExp(specific.id));
+    const decoded = Buffer.from(parts[2].image_url.url.split(",")[1], "base64");
+    assert.deepEqual(
+      await sharp(decoded).raw().toBuffer(),
+      await sharp(bytes).raw().toBuffer(),
+    );
+    assert.doesNotMatch(JSON.stringify(prompt), /base64|uploads[\\/]/);
+    assert.match(
+      call.payload.instructions,
+      /Leia diretamente as imagens anexadas/,
+    );
+  }
+  const file = c.store().read().materiais[0].arquivo;
+  await writeFile(path.join(c.options.uploadsDir, file), "corrompido");
+  const failed = await c.request(`/aulas/${l.id}/gerar`, "POST", {
+    alunoId: a.id,
+  });
+  assert.equal(failed.status, 503);
+  assert.match(failed.data.erro, /anexos de imagem/);
+  assert.doesNotMatch(failed.data.erro, new RegExp(file));
+  assert.equal(h.requests.filter((r) => r.payload?.message).length, 4);
+  assert.equal(c.store().read().aulas[0].gerados[a.id], undefined);
+  assert.equal(c.store().read().publicacoes.length, 0);
+});
+
+test("T07/T08: planejamento editável persiste, orienta a aula e recusa versão ou contexto antigo", async (t) => {
+  const h = await hermesServer(t);
+  const c = await context(t, { textAdapter: h.adapter });
+  const profile = student();
+  profile.preferencias.estiloVisual = "só texto";
+  await c.role("cadastro");
+  const a = (await c.request("/alunos", "POST", profile)).data;
+  await c.role("professor");
+  const l = (await c.request("/aulas", "POST", lesson())).data;
+  await c.request(
+    "/materiais",
+    "POST",
+    upload(l.id, pdf(), "material.pdf", "application/pdf"),
+  );
+  const plan = await c.request(`/aulas/${l.id}/planejamento`, "POST", {
+    alunoId: a.id,
+  });
+  assert.equal(plan.status, 200);
+  assert.deepEqual(Object.keys(plan.data).sort(), ["assuntos", "revisao"]);
+  assert.equal(plan.data.assuntos.length, 2);
+  const changed = structuredClone(plan.data);
+  changed.assuntos[0].abordagem =
+    "Contextualize usando uma viagem de trem e estações, com rigor conceitual.";
+  const saved = await c.request(`/aulas/${l.id}/planejamento`, "PUT", {
+    ...changed,
+    alunoId: a.id,
+  });
+  assert.equal(saved.status, 200);
+  assert.equal(saved.data.revisao, 2);
+  assert.equal(
+    (
+      await c.request(`/aulas/${l.id}/planejamento`, "PUT", {
+        ...changed,
+        alunoId: a.id,
+      })
+    ).status,
+    409,
+  );
+  const invalid = structuredClone(saved.data);
+  invalid.assuntos[0].abordagem = "<script>indesejado</script>";
+  assert.equal(
+    (
+      await c.request(`/aulas/${l.id}/planejamento`, "PUT", {
+        ...invalid,
+        alunoId: a.id,
+      })
+    ).status,
+    400,
+  );
+  await c.restart();
+  await c.role("professor");
+  const reopened = await c.request(`/aulas/${l.id}/planejamento`, "POST", {
+    alunoId: a.id,
+  });
+  assert.deepEqual(reopened.data, saved.data);
+  assert.equal(h.requests.filter((r) => r.payload?.message).length, 2);
+  const generated = await c.request(`/aulas/${l.id}/gerar`, "POST", {
+    alunoId: a.id,
+    planejamentoRevisao: 2,
+  });
+  assert.equal(generated.status, 200);
+  assert.equal(generated.data.planejamentoRevisao, 2);
+  const calls = h.requests.filter((r) => r.payload?.message);
+  assert.equal(calls.length, 4);
+  assert.deepEqual(
+    JSON.parse(calls[2].payload.message).planejamentoCriativo,
+    saved.data.assuntos[0],
+  );
+  assert.match(
+    calls[2].payload.instructions,
+    /Use o planejamentoCriativo revisado/,
+  );
+  const edited = await c.request(`/aulas/${l.id}/planejamento`, "PUT", {
+    ...saved.data,
+    alunoId: a.id,
+  });
+  assert.equal(edited.status, 200);
+  assert.equal(
+    (await c.request(`/aulas/${l.id}/previa?alunoId=${a.id}`)).status,
+    404,
+  );
+  assert.equal(
+    (
+      await c.request(`/aulas/${l.id}/gerar`, "POST", {
+        alunoId: a.id,
+        planejamentoRevisao: 2,
+      })
+    ).status,
+    409,
+  );
+  await c.request(`/aulas/${l.id}`, "PUT", {
+    ...lesson(),
+    titulo: "Novo título",
+    assuntos: l.assuntos,
+  });
+  assert.equal(
+    (
+      await c.request(`/aulas/${l.id}/gerar`, "POST", {
+        alunoId: a.id,
+        planejamentoRevisao: 3,
+      })
+    ).status,
+    409,
+  );
+  assert.equal(h.requests.filter((r) => r.payload?.message).length, 4);
+  h.control.mutatePlanning = (doc) => {
+    doc.assuntoId = randomUUID();
+  };
+  const failed = await c.request(`/aulas/${l.id}/planejamento`, "POST", {
+    alunoId: a.id,
+  });
+  assert.equal(failed.status, 503);
+  assert.match(failed.data.erro, /assunto incorreto/);
+  assert.equal(c.store().read().publicacoes.length, 0);
+  assert.equal(c.store().read().aulas[0].planejamentos[a.id].revisao, 3);
+  await c.role("responsavel");
+  assert.equal(
+    (await c.request(`/aulas/${l.id}/planejamento`, "POST", { alunoId: a.id }))
+      .status,
+    403,
+  );
+});
+
+test("exclusão: confirmação, papéis, cascata e arquivos compartilhados preservam os outros perfis", async (t) => {
+  const c = await context(t);
+  const confirm = { confirmacao: "excluir" };
+  await c.role("cadastro");
+  const a = (await c.request("/alunos", "POST", student())).data;
+  const b = (await c.request("/alunos", "POST", student("Aluno B"))).data;
+  await c.role("professor");
+  const l = (await c.request("/aulas", "POST", lesson())).data;
+  const material = (
+    await c.request(
+      "/materiais",
+      "POST",
+      upload(l.id, pdf(), "material.pdf", "application/pdf"),
+    )
+  ).data;
+  for (const alunoId of [a.id, b.id]) {
+    assert.equal(
+      (await c.request(`/aulas/${l.id}/exemplo`, "POST", { alunoId })).status,
+      200,
+    );
+    assert.equal(
+      (
+        await c.request(`/aulas/${l.id}/publicar`, "POST", {
+          alunoId,
+          revisao: review,
+        })
+      ).status,
+      201,
+    );
+  }
+  const [pa, pb] = c.store().read().publicacoes;
+  const mediaA = pa.assuntos[0].etapas[0].imagem.arquivo;
+  const mediaB = pb.assuntos[0].etapas[0].imagem.arquivo;
+  await c.role("aluno");
+  const sa = (await c.request("/sessoes", "POST", { publicacaoId: pa.id }))
+    .data;
+  await c.request("/sessoes", "POST", { publicacaoId: pb.id });
+  assert.equal(
+    (await c.request(`/aulas/${l.id}`, "DELETE", confirm)).status,
+    403,
+  );
+  await c.role("responsavel");
+  const obs = (
+    await c.request("/observacoes", "POST", {
+      alunoId: a.id,
+      texto: "Observação fictícia",
+      categoria: null,
+    })
+  ).data;
+  assert.equal(
+    (await c.request(`/observacoes/${obs.id}`, "DELETE", {})).status,
+    400,
+  );
+  assert.equal(
+    (await c.request(`/observacoes/${obs.id}`, "DELETE", confirm)).status,
+    200,
+  );
+  await c.request("/observacoes", "POST", {
+    alunoId: a.id,
+    texto: "Outra observação fictícia",
+    categoria: null,
+  });
+  await c.role("psicologo");
+  const note = (
+    await c.request("/notas", "POST", { alunoId: a.id, texto: "Nota fictícia" })
+  ).data;
+  assert.equal(
+    (await c.request(`/notas/${note.id}`, "DELETE", confirm)).status,
+    200,
+  );
+  await c.request("/notas", "POST", {
+    alunoId: a.id,
+    texto: "Nova nota fictícia",
+  });
+  assert.equal(
+    (await c.request(`/sessoes/${sa.id}`, "DELETE", confirm)).status,
+    200,
+  );
+  assert.equal((await c.request(`/relatorios/${a.id}`)).data.sessoes.length, 0);
+  await c.role("professor");
+  assert.equal((await c.request(`/aulas/${l.id}/publicacoes`)).data.length, 2);
+  assert.equal(
+    (await c.request(`/aulas/${l.id}/previa/${a.id}`, "DELETE", confirm))
+      .status,
+    200,
+  );
+  assert.ok((await readFile(path.join(c.options.mediaDir, mediaA))).length);
+  await c.role("aluno");
+  await c.request("/sessoes", "POST", { publicacaoId: pa.id });
+  await c.role("cadastro");
+  assert.equal(
+    (await c.request(`/alunos/${a.id}`, "DELETE", confirm)).status,
+    200,
+  );
+  let state = c.store().read();
+  assert.deepEqual(
+    state.alunos.map((v) => v.id),
+    [b.id],
+  );
+  assert.equal(state.observacoes.length, 0);
+  assert.equal(state.notas.length, 0);
+  assert.deepEqual(
+    state.publicacoes.map((v) => v.id),
+    [pb.id],
+  );
+  assert.equal(state.sessoes.length, 1);
+  assert.equal(state.sessoes[0].alunoId, b.id);
+  await assert.rejects(readFile(path.join(c.options.mediaDir, mediaA)), {
+    code: "ENOENT",
+  });
+  assert.ok((await readFile(path.join(c.options.mediaDir, mediaB))).length);
+  assert.equal(state.materiais[0].id, material.id);
+  await c.role("professor");
+  assert.equal(
+    (await c.request(`/publicacoes/${pb.id}`, "DELETE", confirm)).status,
+    200,
+  );
+  assert.ok((await readFile(path.join(c.options.mediaDir, mediaB))).length); // ainda na prévia B
+  await c.role("ia");
+  await c.request("/ia/testar", "POST", { tipo: "texto" });
+  const record = c.store().read().geracoes.at(-1);
+  assert.equal(
+    (await c.request(`/geracoes/${record.jobId}`, "DELETE", confirm)).status,
+    200,
+  );
+  await c.role("professor");
+  assert.equal(
+    (await c.request(`/materiais/${material.id}`, "DELETE", confirm)).status,
+    200,
+  );
+  state = c.store().read();
+  assert.deepEqual(state.aulas[0].gerados, {});
+  assert.deepEqual(state.aulas[0].planejamentos, {});
+  await assert.rejects(readFile(path.join(c.options.mediaDir, mediaB)), {
+    code: "ENOENT",
+  });
+  assert.equal(
+    (await c.request(`/aulas/${l.id}`, "DELETE", confirm)).status,
+    200,
+  );
+  await c.restart();
+  assert.equal(c.store().read().aulas.length, 0);
+  assert.equal(c.store().read().sessoes.length, 0);
+  assert.equal(c.store().read().alunos.length, 1);
+  await c.role("professor");
+  assert.equal(
+    (await c.request(`/aulas/${l.id}`, "DELETE", confirm)).status,
+    404,
+  );
+});
+
+test("exclusão de aula remove publicações, respostas e arquivos sem afetar outra aula", async (t) => {
+  const c = await context(t);
+  await c.role("cadastro");
+  const a = (await c.request("/alunos", "POST", student())).data;
+  await c.role("professor");
+  const lessons = [];
+  for (let i = 0; i < 2; i++) {
+    const l = (await c.request("/aulas", "POST", lesson())).data;
+    const material = (
+      await c.request(
+        "/materiais",
+        "POST",
+        upload(l.id, pdf(), "material.pdf", "application/pdf"),
+      )
+    ).data;
+    await c.request(`/aulas/${l.id}/exemplo`, "POST", { alunoId: a.id });
+    await c.request(`/aulas/${l.id}/publicar`, "POST", {
+      alunoId: a.id,
+      revisao: review,
+    });
+    lessons.push({ ...l, material });
+  }
+  const before = c.store().read();
+  await c.role("aluno");
+  for (const p of before.publicacoes)
+    await c.request("/sessoes", "POST", { publicacaoId: p.id });
+  await c.role("professor");
+  assert.equal(
+    (
+      await c.request(`/aulas/${lessons[0].id}`, "DELETE", {
+        confirmacao: "excluir",
+      })
+    ).status,
+    200,
+  );
+  const after = c.store().read();
+  assert.deepEqual(
+    after.aulas.map((l) => l.id),
+    [lessons[1].id],
+  );
+  assert.deepEqual(
+    after.publicacoes.map((p) => p.id),
+    [before.publicacoes[1].id],
+  );
+  assert.equal(after.sessoes.length, 1);
+  assert.equal(after.sessoes[0].publicacaoId, before.publicacoes[1].id);
+  const removedFile = before.materiais.find(
+    (m) => m.id === lessons[0].material.id,
+  ).arquivo;
+  const retainedFile = before.materiais.find(
+    (m) => m.id === lessons[1].material.id,
+  ).arquivo;
+  await assert.rejects(readFile(path.join(c.options.uploadsDir, removedFile)), {
+    code: "ENOENT",
+  });
+  assert.ok(
+    (await readFile(path.join(c.options.uploadsDir, retainedFile))).length,
+  );
+  await assert.rejects(
+    readFile(
+      path.join(
+        c.options.mediaDir,
+        before.publicacoes[0].assuntos[0].etapas[0].imagem.arquivo,
+      ),
+    ),
+    { code: "ENOENT" },
+  );
+  assert.ok(
+    (
+      await readFile(
+        path.join(
+          c.options.mediaDir,
+          before.publicacoes[1].assuntos[0].etapas[0].imagem.arquivo,
+        ),
+      )
+    ).length,
+  );
+  await c.restart();
+  assert.equal(c.store().read().publicacoes.length, 1);
+});
+
+test("exclusão: geração em andamento bloqueia cascata; limpeza recusa caminho fora dos uploads", async (t) => {
+  const h = await hermesServer(t);
+  const c = await context(t, { textAdapter: h.adapter });
+  const confirm = { confirmacao: "excluir" };
+  await c.role("cadastro");
+  const a = (await c.request("/alunos", "POST", student())).data;
+  await c.role("professor");
+  const l = (await c.request("/aulas", "POST", lesson())).data;
+  const material = (
+    await c.request(
+      "/materiais",
+      "POST",
+      upload(l.id, pdf(), "material.pdf", "application/pdf"),
+    )
+  ).data;
+  const entered = Promise.withResolvers(),
+    release = Promise.withResolvers();
+  h.control.beforeReply = async () => {
+    entered.resolve();
+    await release.promise;
+  };
+  const planning = c.request(`/aulas/${l.id}/planejamento`, "POST", {
+    alunoId: a.id,
+  });
+  await entered.promise;
+  try {
+    assert.equal(
+      (await c.request(`/aulas/${l.id}`, "DELETE", confirm)).status,
+      409,
+    );
+    assert.equal(
+      (await c.request(`/materiais/${material.id}`, "DELETE", confirm)).status,
+      409,
+    );
+    await c.role("cadastro");
+    assert.equal(
+      (await c.request(`/alunos/${a.id}`, "DELETE", confirm)).status,
+      409,
+    );
+  } finally {
+    release.resolve();
+  }
+  assert.equal((await planning).status, 200);
+  const outside = path.join(path.dirname(c.options.dataDir), "keep.txt");
+  await writeFile(outside, "não apagar");
+  await c.store().update((s) => {
+    s.materiais[0].arquivo = "../keep.txt";
+  });
+  await c.role("professor");
+  const deletionEntered = Promise.withResolvers(),
+    deletionRelease = Promise.withResolvers();
+  const originalUpdate = c.store().update.bind(c.store());
+  c.store().update = (fn) =>
+    originalUpdate(async (state) => {
+      const result = fn(state);
+      deletionEntered.resolve();
+      await deletionRelease.promise;
+      return result;
+    });
+  const deleting = c.request(`/materiais/${material.id}`, "DELETE", confirm);
+  await deletionEntered.promise;
+  try {
+    assert.equal(
+      (await c.request(`/aulas/${l.id}/gerar`, "POST", { alunoId: a.id }))
+        .status,
+      409,
+    );
+  } finally {
+    deletionRelease.resolve();
+  }
+  const deleted = await deleting;
+  c.store().update = originalUpdate;
+  assert.equal(deleted.status, 200);
+  assert.equal(deleted.data.arquivosPendentes, 1);
+  assert.equal(await readFile(outside, "utf8"), "não apagar");
+  assert.equal(JSON.stringify(deleted.data).includes(outside), false);
+});
 
 // PDF sintético pesquisável, sem informação pessoal.
 function pdf() {
@@ -564,7 +1157,7 @@ test("contingência recusa imagem ausente e material sem leitura; provedor nunca
       upload(l.id, image, "fracao.png", "image/png"),
     )
   ).data;
-  assert.equal(m.status, "necessita_revisao");
+  assert.equal(m.status, "enviado");
   assert.equal(
     (await c.request(`/aulas/${l.id}/exemplo`, "POST", { alunoId: a.id }))
       .status,
@@ -1081,7 +1674,7 @@ test("T08/T10/T14: fluxo do adaptador via dublê HTTP, sem inferência real; ima
   assert.equal(generated.data.assuntos.length, 2);
   assert.equal(generated.data.origem, "Codex OAuth via Hermes (texto)");
   const calls = h.requests.filter((r) => r.payload?.message);
-  assert.equal(calls.length, 2);
+  assert.equal(calls.length, 4);
   assert.deepEqual(JSON.parse(calls[0].payload.message).prompt, prompt);
   assert.equal(JSON.stringify(calls).includes(a.nome), false);
   assert.equal(
@@ -1097,7 +1690,7 @@ test("T08/T10/T14: fluxo do adaptador via dublê HTTP, sem inferência real; ima
   const tested = await c.request("/ia/testar", "POST", { tipo: "texto" });
   assert.equal(tested.status, 200);
   assert.equal(tested.data.adaptadores[0].status, "Funcionando");
-  assert.equal(tested.data.adaptadores[2].status, "Não configurado");
+  assert.equal(tested.data.adaptadores[1].status, "Não configurado");
   assert.equal(tested.data.registros.at(-1).provedor, "openai-codex");
   assert.equal(
     (await c.request("/ia/testar", "POST", { tipo: "imagem" })).status,
@@ -1255,7 +1848,7 @@ test("T04/T05/T07: edição de perfil reaparece após reinício e História mant
   );
   file.set("assuntoId", l.assuntos[1].id);
   const m = (await c.request("/materiais", "POST", file)).data;
-  assert.equal(m.status, "necessita_revisao");
+  assert.equal(m.status, "enviado");
   assert.equal(
     (
       await c.request(`/materiais/${m.id}/texto`, "PUT", {
@@ -1326,6 +1919,10 @@ test("T09/T10: mídia do adaptador fica vinculada à prévia, é servida após r
     alunoId: a.id,
   });
   assert.equal(generated.status, 200);
+  assert.equal(
+    generated.data.origem,
+    "Codex OAuth via Hermes (texto) + dublê (imagem)",
+  );
   const filename = generated.data.assuntos[0].etapas[0].imagem.arquivo;
   assert.ok(filename.startsWith(`${l.id}/${a.id}/`));
   assert.ok(filename.endsWith(".png"));

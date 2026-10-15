@@ -23,6 +23,126 @@
 body {
   margin: 0;
 }
+.app-modal {
+  padding: 0;
+  color: var(--color-navy);
+  background: white;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: 0 20px 60px #11135c30;
+  max-height: calc(100dvh - 32px);
+  overflow: hidden;
+}
+.app-modal[open] {
+  display: flex;
+  flex-direction: column;
+}
+.app-modal::backdrop {
+  background: #11135c88;
+}
+.modal-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+  padding: 20px clamp(16px, 4vw, 40px);
+  border-bottom: 1px solid var(--color-line);
+}
+.modal-heading h2 {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: clamp(18px, 2.5vw, 26px);
+}
+.modal-heading button {
+  flex-shrink: 0;
+}
+.modal-content {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: clamp(16px, 4vw, 40px);
+  flex: 1;
+}
+.fullscreen-modal {
+  width: 100vw;
+  max-width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background: var(--color-soft-blue);
+}
+.fullscreen-modal .modal-heading {
+  background: white;
+}
+.fullscreen-modal .card.lesson {
+  margin: 0;
+  min-height: 100%;
+}
+.slide-deck {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  gap: 24px;
+}
+.slide-meta,
+.slide-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.slide-content {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.slide-deck .lesson-content {
+  width: 100%;
+  margin: 0 auto;
+  flex: 1;
+}
+.preview-options {
+  padding-left: 28px;
+  list-style: upper-alpha;
+}
+.preview-options li {
+  padding: 12px 0;
+  font-size: 18px;
+}
+.waiting-modal {
+  width: min(480px, calc(100vw - 32px));
+  margin: auto;
+}
+.generation-wait {
+  text-align: center;
+}
+.generation-spinner {
+  margin: 8px auto 24px;
+  color: var(--color-brand);
+  animation: generation-spin 2s linear infinite;
+}
+.waiting-message {
+  font-size: 22px;
+  font-weight: 600;
+  min-height: 3em;
+}
+@keyframes generation-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .generation-spinner {
+    animation: none;
+  }
+}
 button,
 input,
 textarea,
@@ -92,10 +212,15 @@ button.secondary {
   display: block;
   width: 310px;
   height: 64px;
-  background-image: url("/references/professor.jpeg");
-  background-size: 1600px 900px;
-  background-position: -45px -5px;
-  flex-shrink: 0;
+  max-width: 60vw;
+  flex-shrink: 1;
+}
+.brand img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: left center;
 }
 .top-meta {
   display: flex;
@@ -705,8 +830,6 @@ footer {
   .brand {
     width: 260px;
     height: 55px;
-    background-size: 1360px 765px;
-    background-position: -38px -4px;
   }
   .top-meta {
     font-size: 12px;

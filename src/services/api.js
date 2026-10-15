@@ -1,4 +1,15 @@
+import { beginGeneration } from "./generation-wait.js";
+
 export async function api(url, options = {}) {
+  const done = beginGeneration(url, options.method);
+  try {
+    return await request(url, options);
+  } finally {
+    done();
+  }
+}
+
+async function request(url, options = {}) {
   let response;
   try {
     response = await fetch("/api" + url, {
@@ -23,13 +34,16 @@ export async function api(url, options = {}) {
   const data = await response
     .json()
     .catch(() => ({ erro: "Resposta inesperada do servidor." }));
-  if (!response.ok)
-    throw new Error(
+  if (!response.ok) {
+    const error = new Error(
       data.erro +
         (data.detalhes?.length
           ? " " +
             data.detalhes.map((d) => `${d.campo}: ${d.mensagem}`).join(" ")
           : ""),
     );
+    error.status = response.status;
+    throw error;
+  }
   return data;
 }

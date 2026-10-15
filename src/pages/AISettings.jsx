@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Settings, ClipboardList } from "lucide-react";
 import { api } from "../services/api.js";
+import DeleteButton from "../components/DeleteButton.jsx";
 import {
   Card,
   Message,
@@ -56,13 +57,13 @@ export default function AISettings() {
           >
             Testar geração PNG/WebP
           </button>
-          <button
+          {state.data?.reservaConfigurada && <button
             disabled={busy}
             className="secondary"
             onClick={() => test("fallback")}
           >
             Testar fallback
-          </button>
+          </button>}
         </div>
         <p className="warning-note mt-5">
           Sem adaptador configurado, o teste registra indisponibilidade e não
@@ -87,6 +88,13 @@ export default function AISettings() {
                 {r.adaptador} · {formatDate(r.criadoEm)} · {r.duracaoMs} ms ·
                 fallback: {r.fallbackUsado ? "sim" : "não"}
               </small>
+              <DeleteButton
+                url={`/geracoes/${r.jobId}`}
+                title={`registro de ${r.tipo} de ${formatDate(r.criadoEm)}`}
+                description="Apaga somente este registro de geração. Aulas e conteúdos gerados são preservados."
+                disabled={busy}
+                onDeleted={state.reload}
+              />
             </div>
           ))}
       </Card>

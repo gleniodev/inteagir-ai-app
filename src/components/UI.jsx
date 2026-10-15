@@ -63,6 +63,9 @@ export function Empty({ children }) {
 export function Tag({ children }) {
   return <span className="tag">{children}</span>;
 }
+export function ContentOrigin({ value }) {
+  return value === "Pré-gerado para demonstração" ? <Tag>{value}</Tag> : null;
+}
 export function useData(url) {
   const [state, set] = useState({ data: null, loading: true, error: "" });
   const [version, reload] = useState(0);
@@ -115,6 +118,7 @@ export function StudentSelect({ students, value, onChange }) {
 }
 export const formatDate = (value) => new Date(value).toLocaleString("pt-BR");
 export const materialStatus = {
+  enviado: "Enviado",
   lido: "Lido",
   necessita_revisao: "Necessita revisão",
   erro: "Erro",

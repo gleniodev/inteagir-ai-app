@@ -32,6 +32,7 @@ Object.assign(env, {
   HERMES_RUNTIME_DIR: tools,
   PYTHONUTF8: "1",
   PYTHONUNBUFFERED: "1",
+  PYTHONDONTWRITEBYTECODE: "1",
 });
 const pin = JSON.parse(
   readFileSync(path.join(source, "pm", "lock.json"), "utf8"),
@@ -45,9 +46,11 @@ const bootstrap = path.join(
   `python-${pin}-${target}`,
   process.platform === "win32" ? "python.exe" : "bin/python3",
 );
-if (!existsSync(bootstrap))
+if (!process.env.INTEAGIR_HERMES_PYTHON && !existsSync(bootstrap))
   throw new Error("Runtime dedicado não preparado. Consulte docs/IA_LOCAL.md.");
-const selected = spawnSync(
+const selected = process.env.INTEAGIR_HERMES_PYTHON
+  ? { status: 0, stdout: process.env.INTEAGIR_HERMES_PYTHON }
+  : spawnSync(
   bootstrap,
   [
     "-c",
@@ -61,11 +64,20 @@ const python = selected.stdout.trim();
 if (!python || !existsSync(python))
   throw new Error("Dependências Hermes ainda não preparadas.");
 const args = process.argv.slice(2);
-const child = spawn(
-  python,
-  ["-u", "hermes", ...(args.length ? args : ["--version"])],
-  { cwd: source, env, stdio: "inherit", windowsHide: true },
-);
+const invocation =
+  args[0] === "image-backend"
+    ? [
+        "-u",
+        path.join(root, "server", "services", "hermes-codex-image.py"),
+        process.execPath,
+      ]
+    : ["-u", "hermes", ...(args.length ? args : ["--version"])];
+const child = spawn(python, invocation, {
+  cwd: source,
+  env,
+  stdio: "inherit",
+  windowsHide: true,
+});
 child.on("error", () => {
   console.error("Não foi possível iniciar o Hermes dedicado.");
   process.exitCode = 1;

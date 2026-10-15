@@ -1,0 +1,5 @@
+# Arquivos operacionais precisam de LF também no checkout Windows.
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.service text eol=lf
+*.timer text eol=lf

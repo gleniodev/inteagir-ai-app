@@ -7,7 +7,19 @@ import { mkdir, writeFile, readFile, copyFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
 import { createStore } from "./services/store.js";
+import { registerDeletions } from "./routes/deletions.js";
 import { compilePrompt } from "./services/prompt.js";
+import { creativePlan } from "../shared/planning.js";
+import {
+  currentPlan,
+  preparePlan,
+  publicPlan,
+  PlanningConflict,
+} from "./services/planning.js";
+import {
+  isVisualMaterial,
+  prepareVisualMaterials,
+} from "./services/visual-materials.js";
 import { GenerationError } from "./services/hermes-text.js";
 import {
   studentInput,
@@ -53,7 +65,14 @@ const publicStep = (e) => {
   const { indiceCorreto, dica, feedbackAcerto, explicacao, ...safe } = e;
   return safe;
 };
-const safeMaterial = ({ arquivo, texto, ...m }) => m;
+const visualMaterialMessage =
+  "Imagem validada. Será anexada ao prompt para a IA ler e compreender durante a geração da aula. Texto manual é opcional; revise a aula gerada antes de publicar.";
+const safeMaterial = ({ arquivo, texto, ...m }) => {
+  if (isVisualMaterial(m) && m.status === "necessita_revisao") {
+    return { ...m, status: "enviado", mensagem: visualMaterialMessage };
+  }
+  return m;
+};
 const latestPrompt = (s) => s.diretrizes.at(-1);
 function invalidatePreviews(state, alunoId) {
   for (const lesson of state.aulas) {
@@ -116,7 +135,8 @@ export async function createApp({
     bucket.total++;
     if (
       req.method === "POST" &&
-      (req.path === "/materiais" || /\/(gerar|exemplo|testar)$/.test(req.path))
+      (req.path === "/materiais" ||
+        /\/(gerar|exemplo|testar|planejamento)$/.test(req.path))
     )
       bucket.heavy++;
     if (bucket.total > 240 || bucket.heavy > 12) {
@@ -218,6 +238,15 @@ export async function createApp({
       }),
     );
   });
+  registerDeletions(app, {
+    store,
+    allow,
+    fail,
+    find,
+    generating,
+    uploadsDir,
+    mediaDir,
+  });
   app.get("/api/aulas", allow("professor"), (req, res) =>
     res.json(store.read().aulas),
   );
@@ -305,9 +334,9 @@ export async function createApp({
         fail(400, "Assunto não pertence à aula.");
       const { buffer, mimetype, originalname, size } = req.file;
       let extracted = "",
-        status = "necessita_revisao",
+        status = "enviado",
         mensagem =
-          "Sem OCR verificado. Confira a imagem e prepare o texto manualmente.";
+          "Imagem validada. Será anexada ao prompt para a IA ler e compreender durante a geração da aula. Texto manual é opcional; revise a aula gerada antes de publicar.";
       let ext;
       if (mimetype === "application/pdf") {
         if (buffer.subarray(0, 5).toString() !== "%PDF-")
@@ -438,6 +467,81 @@ export async function createApp({
       fail(400, "Aluno não pertence à turma da aula.");
     res.json(compilePrompt(s, a, aluno));
   });
+  app.post(
+    "/api/aulas/:id/planejamento",
+    allow("professor"),
+    async (req, res) => {
+      const { alunoId, refazer } = z
+        .object({ alunoId: idSchema, refazer: z.boolean().default(false) })
+        .strict()
+        .parse(req.body);
+      const s = store.read(),
+        lesson = find(s.aulas, req.params.id),
+        student = find(s.alunos, alunoId);
+      if (lesson.turmaId !== student.turmaId)
+        fail(400, "Aluno não pertence à turma da aula.");
+      if (generating.has(lesson.id) || generating.has("*"))
+        fail(409, "Aguarde a preparação em andamento desta aula.");
+      generating.add(lesson.id);
+      try {
+        res.json(
+          publicPlan(
+            await preparePlan({
+              store,
+              lessonId: lesson.id,
+              studentId: alunoId,
+              textAdapter,
+              uploadsDir,
+              force: refazer,
+            }),
+          ),
+        );
+      } catch (error) {
+        fail(
+          error instanceof PlanningConflict ? 409 : 503,
+          error instanceof GenerationError
+            ? error.message
+            : "Não foi possível preparar o prompt criativo. Tente novamente.",
+        );
+      } finally {
+        generating.delete(lesson.id);
+      }
+    },
+  );
+  app.put(
+    "/api/aulas/:id/planejamento",
+    allow("professor"),
+    async (req, res) => {
+      const { alunoId, revisao, assuntos } = creativePlan
+        .extend({ alunoId: idSchema, revisao: z.number().int().positive() })
+        .parse(req.body);
+      if (generating.has(req.params.id) || generating.has("*"))
+        fail(409, "Aguarde a geração em andamento antes de editar o prompt.");
+      const saved = await store.update((s) => {
+        const lesson = find(s.aulas, req.params.id),
+          student = find(s.alunos, alunoId);
+        if (lesson.turmaId !== student.turmaId)
+          fail(400, "Aluno não pertence à turma da aula.");
+        const plan = currentPlan(
+          lesson,
+          alunoId,
+          compilePrompt(s, lesson, student),
+        );
+        if (!plan || plan.revisao !== revisao)
+          fail(409, "Prompt desatualizado. Abra o planejamento novamente.");
+        if (
+          assuntos.length !== lesson.assuntos.length ||
+          assuntos.some((a, i) => a.assuntoId !== lesson.assuntos[i].id)
+        )
+          fail(400, "Preserve os assuntos da aula no planejamento.");
+        plan.assuntos = assuntos;
+        plan.revisao++;
+        delete lesson.gerados[alunoId];
+        return publicPlan(plan);
+      });
+      res.json(saved);
+    },
+  );
   const status = () => ({
     configVersion: "1.0",
     promptBaseVersion: latestPrompt(store.read()).versao,
@@ -447,15 +551,15 @@ export async function createApp({
         status: textAdapter?.status() ?? "Não configurado",
       },
       {
-        nome: "Antigravity/agy (texto, experimental)",
-        status: "Não verificado",
-      },
-      {
         nome: "Imagem primária",
         status: imageAdapter?.status() ?? "Não configurado",
       },
-      { nome: "Imagem reserva", status: "Não verificado" },
+      ...(imageAdapter?.supportsFallback ? [{
+        nome: "Imagem reserva",
+        status: imageAdapter.fallbackStatus(),
+      }] : []),
     ],
+    reservaConfigurada: imageAdapter?.supportsFallback === true,
     registros: store.read().geracoes.slice(-10),
   });
   app.get("/api/ia/status", (req, res) => res.json(status()));
@@ -464,16 +568,23 @@ export async function createApp({
       .object({ tipo: z.enum(["texto", "imagem", "fallback"]) })
       .strict()
       .parse(req.body);
-    if (tipo === "imagem" && imageAdapter) {
+    if (
+      (tipo === "imagem" || tipo === "fallback") &&
+      imageAdapter &&
+      (tipo !== "fallback" || imageAdapter.fallbackStatus)
+    ) {
       const started = Date.now();
       let verified,
+        attempts,
         message =
           "Imagem PNG real salva no backend; revisão visual do professor necessária.";
       try {
         verified = await imageAdapter.generate({
+          fallbackOnly: tipo === "fallback",
           pedido:
             "Ilustração pedagógica: exatamente quatro vagões iguais em linha, um azul e três cinza, fundo branco, sem texto nem números.",
         });
+        attempts = verified.tentativas;
         const directory = path.join(mediaDir, "verificacao");
         await mkdir(directory, { recursive: true });
         await writeFile(
@@ -482,6 +593,7 @@ export async function createApp({
           { flag: "wx" },
         );
       } catch (error) {
+        attempts = error.tentativas ?? attempts;
         message =
           error instanceof GenerationError
             ? error.message
@@ -496,9 +608,10 @@ export async function createApp({
           resultado: verified ? "sucesso" : "falha",
           criadoEm: now(),
           duracaoMs: Date.now() - started,
-          fallbackUsado: false,
+          fallbackUsado: verified?.fallbackUsado ?? false,
           provedor: verified?.provider,
           modelo: verified?.model,
+          tentativas: attempts,
           mensagem: message,
         });
         return null;
@@ -584,8 +697,11 @@ export async function createApp({
     );
   });
   app.post("/api/aulas/:id/gerar", allow("professor"), async (req, res) => {
-    const { alunoId } = z
-      .object({ alunoId: idSchema })
+    const { alunoId, planejamentoRevisao } = z
+      .object({
+        alunoId: idSchema,
+        planejamentoRevisao: z.number().int().positive().optional(),
+      })
       .strict()
       .parse(req.body);
     if (textAdapter) {
@@ -598,15 +714,30 @@ export async function createApp({
         !lesson.materiais.length ||
         snapshot.materiais
           .filter((m) => lesson.materiais.includes(m.id))
-          .some((m) => m.status !== "lido")
+          .some((m) => m.status !== "lido" && !isVisualMaterial(m))
       )
         fail(400, "Envie material e revise/preencha o texto antes de gerar.");
-      if (generating.has(lesson.id))
+      if (generating.has(lesson.id) || generating.has("*"))
         fail(409, "Aguarde a preparação em andamento desta aula.");
       const prompt = compilePrompt(snapshot, lesson, student);
+      if (
+        planejamentoRevisao &&
+        currentPlan(lesson, alunoId, prompt)?.revisao !== planejamentoRevisao
+      )
+        fail(
+          409,
+          "Prompt desatualizado. Abra o planejamento novamente antes de gerar.",
+        );
       const records = [];
       generating.add(lesson.id);
       try {
+        const planning = await preparePlan({
+          store,
+          lessonId: lesson.id,
+          studentId: alunoId,
+          textAdapter,
+          uploadsDir,
+        });
         const subjects = [];
         for (const assunto of lesson.assuntos) {
           const started = Date.now();
@@ -618,6 +749,7 @@ export async function createApp({
             tipo: "texto",
             promptBaseVersion: prompt.promptBaseVersion,
             adaptador: textAdapter.name,
+            planejamentoRevisao: planning.revisao,
             resultado: "falha",
             criadoEm: now(),
             duracaoMs: 0,
@@ -627,7 +759,21 @@ export async function createApp({
           records.push(record);
           let result;
           try {
-            result = await textAdapter.generate({ prompt, assunto });
+            const images = await prepareVisualMaterials({
+              materials: snapshot.materiais.filter((m) =>
+                lesson.materiais.includes(m.id),
+              ),
+              uploadsDir,
+              assuntoId: assunto.id,
+            });
+            result = await textAdapter.generate({
+              prompt,
+              assunto,
+              images,
+              planejamento: planning.assuntos.find(
+                (a) => a.assuntoId === assunto.id,
+              ),
+            });
             record.resultado = "sucesso";
             record.provedor = result.provider;
             record.modelo = result.model;
@@ -672,8 +818,13 @@ export async function createApp({
               imageRecord.resultado = "sucesso";
               imageRecord.provedor = image.provider;
               imageRecord.modelo = image.model;
+              imageRecord.fallbackUsado = image.fallbackUsado ?? false;
+              imageRecord.tentativas = image.tentativas;
               imageRecord.mensagem =
                 "PNG real salvo; revisão visual do professor necessária.";
+            } catch (error) {
+              imageRecord.tentativas = error.tentativas;
+              throw error;
             } finally {
               imageRecord.duracaoMs = Date.now() - imageStarted;
             }
@@ -693,10 +844,11 @@ export async function createApp({
             );
           current.gerados[alunoId] = {
             assuntos: subjects,
+            planejamentoRevisao: planning.revisao,
             origem: subjects.some((d) =>
               d.etapas.some((e) => e.imagem?.arquivo),
             )
-              ? "Codex OAuth via Hermes (texto) + agy oficial (imagem)"
+              ? `Codex OAuth via Hermes (texto) + ${[...new Set(records.filter((r) => r.tipo === "imagem" && r.resultado === "sucesso").map((r) => r.provedor))].join(", ")} (imagem)`
               : "Codex OAuth via Hermes (texto)",
             promptBaseVersion: prompt.promptBaseVersion,
           };
@@ -732,7 +884,14 @@ export async function createApp({
           s.geracoes.push(...records);
           return null;
         });
-        fail(error instanceof ApiError ? error.status : 503, message);
+        fail(
+          error instanceof ApiError
+            ? error.status
+            : error instanceof PlanningConflict
+              ? 409
+              : 503,
+          message,
+        );
       } finally {
         generating.delete(lesson.id);
       }
@@ -767,7 +926,7 @@ export async function createApp({
       .object({ alunoId: idSchema })
       .strict()
       .parse(req.body);
-    if (generating.has(req.params.id))
+    if (generating.has(req.params.id) || generating.has("*"))
       fail(409, "Aguarde a preparação em andamento desta aula.");
     // O exemplo usa apenas arquivos locais: preparar dentro da fila garante
     // uma única versão de aula, material, perfil e diretrizes, sem corridas.
@@ -873,7 +1032,7 @@ export async function createApp({
   }
   app.post("/api/aulas/:id/publicar", allow("professor"), async (req, res) => {
     const value = reviewInput.parse(req.body);
-    if (generating.has(req.params.id))
+    if (generating.has(req.params.id) || generating.has("*"))
       fail(409, "Aguarde a preparação em andamento desta aula.");
     const pub = await store.update(async (s) => {
       const a = find(s.aulas, req.params.id);

@@ -1,5 +1,11 @@
 # Decisões
 
+## DEC-008 — 14/10/2026 — Imagem OpenAI pelo cliente oficial com OAuth
+
+Usuário exige somente OAuth, sem chaves de API, OpenAI primária e Nano Banana 2 reserva. O plugin bundled Hermes que acessa rota interna diretamente não foi adotado; o provedor do projeto usa a ABC/registry Hermes em processo dedicado e a ferramenta nativa do cliente oficial Codex/app-server por stdio. Login novo no perfil exclusivo confirmado, tokens geridos pelo cliente e nunca importados/exportados pelo projeto. Perfil sem shell/subagentes/apps/plugins/view_image; sandbox read-only, pedidos tratados como dados, aprovações recusadas, turno interrompido em ferramenta inesperada. Imagem limitada/decodificada/confinada ao cache antes de mídia relativa da aula; modelo de imagem desconhecido não é inventado. Texto conserva toolsets vazios.
+
+Primária produziu imagem real por registry e pelo backend HTTP; prévia/imagem restauradas em novo processo, sem publicação. Flag privada ativada após prova real; default público false. Reserva ausente e erro honesto preservados: DEC-007/condições Google não revogadas por êxito OpenAI. Objetivo dos dois provedores ainda parcial; revisão humana/QA/VPS pendentes. Evidência em `.ai/evidencias/ia-openai-oauth-2026-10-14/`. Processo principal antigo preservado, requer reinício manual. Nenhuma dependência ou edição do checkout Hermes.
+
 ## DEC-007 — 14/10/2026 — Prévia coerente e condições do provedor
 
 T07/T10: mudanças no conteúdo do prompt invalidam prévias pendentes na fila JSON (preferências/turma apenas do aluno; diretrizes para todos). Nome/e-mail não integram prompt e não invalidam. Publicações/sessões/versões anteriores preservadas. Teste HTTP reproduziu e corrigiu publicação de prévia obsoleta.

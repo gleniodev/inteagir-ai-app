@@ -8,6 +8,7 @@ import {
   Save,
 } from "lucide-react";
 import { api } from "../services/api.js";
+import DeleteButton from "../components/DeleteButton.jsx";
 import {
   Card,
   Field,
@@ -159,6 +160,20 @@ export default function Registration() {
         <button className="secondary" onClick={() => select("")}>
           Novo perfil fictício
         </button>
+        {id && (
+          <DeleteButton
+            url={`/alunos/${id}`}
+            title={`perfil “${students.data?.find((a) => a.id === id)?.nome ?? form.nome}”`}
+            description="Apaga este perfil, preferências, planejamentos, prévias, publicações personalizadas, respostas, observações e anotações. As aulas e anexos compartilhados do professor permanecem para os demais alunos."
+            disabled={busy}
+            label="Excluir perfil"
+            onDeleted={() => {
+              select("");
+              students.reload();
+              setSuccess("Perfil e registros vinculados excluídos.");
+            }}
+          />
+        )}
       </div>
       <form onSubmit={save}>
         <div className="grid xl:grid-cols-2 gap-5 mt-5">

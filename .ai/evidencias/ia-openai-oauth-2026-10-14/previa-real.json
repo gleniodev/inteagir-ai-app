@@ -1,0 +1,71 @@
+{
+  "assuntos": [
+    {
+      "versaoEsquema": "1.0",
+      "assuntoId": "f0904759-513e-4753-9171-23cb71ee31d0",
+      "titulo": "Frações",
+      "objetivo": "Interpretar frações",
+      "observacoesParaProfessor": [
+        "Apresentar as etapas na ordem, com leitura breve e sem áudio ou movimento."
+      ],
+      "etapas": [
+        {
+          "id": "explicacao-1",
+          "tipo": "explicacao",
+          "titulo": "Partes iguais",
+          "texto": "Uma fração mostra partes iguais de um todo. Em 1/4, o número de baixo, 4, indica o total de partes; o número de cima, 1, indica quantas foram escolhidas. Frações diferentes podem representar a mesma quantidade: 1/2 equivale a 2/4.",
+          "imagem": {
+            "necessaria": true,
+            "pedido": "Ilustração estática, simples e sem texto: quatro vagões de trem do mesmo tamanho, alinhados e claramente separados. Um vagão azul e três cinza. Fundo liso, sem números, letras, legendas ou outros elementos.",
+            "alt": "Quatro vagões iguais: um azul e três cinza. O vagão azul representa uma de quatro partes iguais.",
+            "arquivo": "dadcac66-7c3e-49e8-8869-fdb689306c7d/eed69c13-22e6-4ec3-8c23-3364f3c99618/3b18aa9e-fcd6-467f-a1c5-2951c6e54dcb.png"
+          }
+        },
+        {
+          "id": "questao-1",
+          "tipo": "questao",
+          "enunciado": "Em 1/4, o que indica o número 4?",
+          "alternativas": [
+            "O total de partes iguais",
+            "As partes escolhidas",
+            "O número de trens"
+          ],
+          "indiceCorreto": 0,
+          "dica": "Olhe para o número de baixo da fração.",
+          "feedbackAcerto": "Isso! São quatro partes iguais.",
+          "explicacao": "O denominador, 4, indica em quantas partes iguais o todo foi dividido."
+        },
+        {
+          "id": "questao-2",
+          "tipo": "questao",
+          "enunciado": "Há quatro vagões iguais e um é azul. Que fração dos vagões é azul?",
+          "alternativas": [
+            "4/1",
+            "1/4",
+            "3/4"
+          ],
+          "indiceCorreto": 1,
+          "dica": "Conte os vagões azuis e depois o total de vagões.",
+          "feedbackAcerto": "Certo! Um dos quatro vagões é azul.",
+          "explicacao": "Há 1 vagão azul entre 4 vagões iguais, portanto a fração é 1/4."
+        },
+        {
+          "id": "questao-3",
+          "tipo": "questao",
+          "enunciado": "Qual fração equivale a 1/2?",
+          "alternativas": [
+            "1/4",
+            "3/4",
+            "2/4"
+          ],
+          "indiceCorreto": 2,
+          "dica": "Pense em quantas partes são necessárias para formar metade de quatro partes iguais.",
+          "feedbackAcerto": "Isso! 2/4 representa metade.",
+          "explicacao": "Duas de quatro partes iguais formam metade do todo. Por isso, 2/4 equivale a 1/2."
+        }
+      ]
+    }
+  ],
+  "origem": "Codex OAuth via Hermes (texto) + openai-codex (imagem)",
+  "promptBaseVersion": 1
+}

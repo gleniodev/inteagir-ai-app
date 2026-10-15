@@ -1,0 +1,66 @@
+{
+  "data": "2026-10-14T18:02:44.071Z",
+  "modeloSolicitado": "gpt-6-sol",
+  "status": "Funcionando",
+  "registros": [
+    {
+      "jobId": "15569462-b132-4308-87b2-523ca170e391",
+      "aulaId": "dadcac66-7c3e-49e8-8869-fdb689306c7d",
+      "alunoId": "eed69c13-22e6-4ec3-8c23-3364f3c99618",
+      "assuntoId": "f0904759-513e-4753-9171-23cb71ee31d0",
+      "tipo": "texto",
+      "promptBaseVersion": 1,
+      "adaptador": "Codex OAuth via Hermes (texto)",
+      "resultado": "sucesso",
+      "criadoEm": "2026-10-14T18:01:50.744Z",
+      "duracaoMs": 12372,
+      "fallbackUsado": false,
+      "mensagem": "Texto JSON validado; revisão do professor necessária.",
+      "provedor": "openai-codex",
+      "modelo": "gpt-6-sol"
+    },
+    {
+      "jobId": "ad633aab-1b33-4ac2-b777-e80eb8894b6d",
+      "aulaId": "dadcac66-7c3e-49e8-8869-fdb689306c7d",
+      "alunoId": "eed69c13-22e6-4ec3-8c23-3364f3c99618",
+      "assuntoId": "f0904759-513e-4753-9171-23cb71ee31d0",
+      "tipo": "imagem",
+      "promptBaseVersion": 1,
+      "adaptador": "OpenAI → Nano Banana 2 (imagem, OAuth)",
+      "resultado": "sucesso",
+      "criadoEm": "2026-10-14T18:02:03.116Z",
+      "duracaoMs": 40608,
+      "fallbackUsado": false,
+      "mensagem": "PNG real salvo; revisão visual do professor necessária.",
+      "provedor": "openai-codex",
+      "tentativas": [
+        {
+          "papel": "primaria",
+          "resultado": "sucesso",
+          "duracaoMs": 40605
+        }
+      ]
+    }
+  ],
+  "publicacoes": 0,
+  "statusImagem": "Funcionando",
+  "limite": "Teste HTTP local com OAuth; sem publicação, navegador ou VPS. Reserva Google não ativada.",
+  "reinicio": {
+    "reinicio": "novo processo Node",
+    "previaRestaurada": true,
+    "mediaHTTP": 200,
+    "bytes": 803697,
+    "sha256": "7dde48aaadca85af7af006981d7162737217929617ebe2c47bc4ad90f37c22dc",
+    "fallbackHTTP": 503,
+    "statusReserva": "Não configurado",
+    "publicacoes": 0
+  },
+  "revisaoVisualAgente": {
+    "observada": true,
+    "quatroVagoes": true,
+    "umAzulTresCinza": true,
+    "imagem": "imagem-real.png"
+  },
+  "revisaoHumana": "pendente",
+  "fallback": "Não configurado"
+}

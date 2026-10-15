@@ -12,9 +12,19 @@ export function compilePrompt(state, lesson, student) {
       materiais: state.materiais
         .filter((m) => lesson.materiais.includes(m.id))
         .map((m) => ({
+          materialId: m.id,
           assuntoId: m.assuntoId,
           status: m.status,
           textoNaoConfiavel: m.texto,
+          ...(m.mime?.startsWith("image/")
+            ? {
+                imagem: {
+                  anexoId: m.id,
+                  mime: m.mime,
+                  envio: "anexo visual à IA",
+                },
+              }
+            : {}),
         })),
     },
     preferenciasAluno: {

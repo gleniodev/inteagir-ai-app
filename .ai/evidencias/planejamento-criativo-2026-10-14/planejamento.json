@@ -1,0 +1,14 @@
+{
+  "assuntos": [
+    {
+      "assuntoId": "ee2a7e63-989d-4115-8de2-e386cca5f36b",
+      "compreensao": "O anexo mostra o título «EXERCICIO DE MATEMATICA» e a pergunta «Calcule: 17 x 6 = ?». A operação é uma multiplicação; 17 × 6 = 102. O objetivo aprovado é explicar o raciocínio e resolver o exercício visual.",
+      "abordagem": "Usar uma analogia textual com seis trens de 17 lugares cada, deixando claro que ela serve apenas para representar os seis grupos de 17 e não faz parte do enunciado. Apresente a explicação em passos curtos e use a decomposição distributiva.",
+      "explicacao": "Planejar uma sequência curta: ler a operação do anexo; identificar 17 e 6 como fatores; decompor 17 em 10 + 7; calcular 10 × 6 = 60 e 7 × 6 = 42; somar 60 + 42 = 102 e conferir o resultado.",
+      "imagens": "Dispensar novas imagens: a preferência é por texto. Transcrever a operação do anexo para que a atividade não dependa de vê-lo.",
+      "questoes": "1. Qual operação aparece no anexo? A) 17 + 6 B) 17 × 6 C) 17 − 6. Gabarito: B. 2. Ao decompor 17 em 10 + 7, qual cálculo representa 17 × 6? A) 10 × 6 + 7 × 6 B) 10 + 7 × 6 C) 10 × 7 + 6. Gabarito: A. 3. Qual é o resultado de 17 × 6? A) 92 B) 102 C) 112. Gabarito: B.",
+      "cuidados": "Não há parte ilegível relevante no anexo. Manter texto curto, etapas previsíveis e respostas por alternativas. Oferecer uma dica antes da resposta, feedback breve e indicação textual de progresso; evitar sons, movimentos e reprodução automática de áudio. A analogia com trens é opcional e não altera os dados do exercício."
+    }
+  ],
+  "revisao": 2
+}

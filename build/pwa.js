@@ -9,6 +9,11 @@ export async function createWorker(distDir, template) {
     "manifest.webmanifest",
     "icon-192.png",
     "icon-512.png",
+    "logo-inteagir.webp",
+    "symbol-inteagir.webp",
+    "favicon-16.png",
+    "favicon-32.png",
+    "apple-touch-icon.png",
   ];
   for (const directory of ["assets", "references"]) {
     for (const file of await readdir(path.join(distDir, directory)))

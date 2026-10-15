@@ -1,5 +1,9 @@
 # T00 — Inventário visual observado
 
+## Assets originais recebidos — logo e símbolo
+
+Usuário forneceu public/logo-inteagir.webp (812×268, alpha) e public/symbol-inteagir.webp (1020×1014, alpha), ambos abertos e observados. Autoriza substituir logo recortada do screenshot e gerar ícones por exportação convencional, preservando desenho/proporções. Professor.jpeg reaberto para contexto do cabeçalho; App.jsx agora img do asset original, styles.css object-fit contain/posição esquerda/max-width responsivo, sem background de screenshot no logo. Hero/banners continuam nas referências existentes. scripts/build-brand-icons.js gera PNG192/512 PWA, favicon16/32 e Apple180 (fundo branco); ícone192 exportado aberto/observado. Nenhuma redesenho/generação IA. Novo estado não comparado em navegador (QA adiado); não aprovar fidelidade/tamanhos mobile sem captura. Nota antiga de logo original ausente abaixo foi superada apenas para marca; demais assets separados continuam pendentes.
+
 ## Continuação T11/T12 — retorno na aula, 14/10/2026
 Pasta relistada (quatro JPEGs, sem subpastas). aluno.jpeg (cadastro, não aula), responsavel.jpeg e psicologo.jpeg reabertos visualmente. Student.jsx reutiliza botão secundário/ícone Lucide já adotados para Voltar; Reports.jsx usa total realizado preservado. Sem CSS, tokens, assets ou composição novos. Referência própria da aula ausente. Nenhum navegador acessado ou captura nova produzida: comparação visual, teclado e mobile permanecem pendentes por adiamento do usuário; não declarar fidelidade aprovada.
 

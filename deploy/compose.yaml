@@ -1,0 +1,38 @@
+name: inteagir-ai
+services:
+  app:
+    image: inteagir-ai:${INTEAGIR_RELEASE:-local}
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    init: true
+    restart: unless-stopped
+    env_file: /opt/inteagir-ai/runtime.env
+    ports:
+      - "127.0.0.1:3091:3001"
+    volumes:
+      - data:/app/server/data
+      - uploads:/app/server/uploads
+      - media:/app/server/media
+      - hermes:/app/.local/hermes-profile
+      - codex:/app/.local/codex-image-profile
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+    mem_limit: 3g
+    cpus: 2
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3001/manifest.webmanifest').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+volumes:
+  data:
+  uploads:
+  media:
+  hermes:
+  codex:

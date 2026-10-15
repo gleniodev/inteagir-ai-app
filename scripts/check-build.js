@@ -23,7 +23,16 @@ assert.ok(
     (url) =>
       url === "/" ||
       /^\/(assets|references)\/[^/]+$/.test(url) ||
-      ["/manifest.webmanifest", "/icon-192.png", "/icon-512.png"].includes(url),
+      [
+        "/manifest.webmanifest",
+        "/icon-192.png",
+        "/icon-512.png",
+        "/logo-inteagir.webp",
+        "/symbol-inteagir.webp",
+        "/favicon-16.png",
+        "/favicon-32.png",
+        "/apple-touch-icon.png",
+      ].includes(url),
   ),
 );
 

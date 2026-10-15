@@ -1,0 +1,69 @@
+{
+  "assuntos": [
+    {
+      "versaoEsquema": "1.0",
+      "assuntoId": "5c35f2c8-987d-44ec-ba5f-cf0ede4ae223",
+      "titulo": "Exercício do material",
+      "objetivo": "Explicar o raciocínio e resolver o exercício visual",
+      "observacoesParaProfessor": [],
+      "etapas": [
+        {
+          "id": "exp1",
+          "tipo": "explicacao",
+          "titulo": "Calcule 17 × 6",
+          "texto": "O exercício pede 17 × 6. Separe 17 em 10 + 7. Calcule 10 × 6 = 60 e 7 × 6 = 42. Depois, some: 60 + 42 = 102. Portanto, 17 × 6 = 102.",
+          "imagem": {
+            "necessaria": false,
+            "pedido": "",
+            "alt": "",
+            "arquivo": null
+          }
+        },
+        {
+          "id": "q1",
+          "tipo": "questao",
+          "enunciado": "Para começar, quanto é 10 × 6?",
+          "alternativas": [
+            "16",
+            "60",
+            "106"
+          ],
+          "indiceCorreto": 1,
+          "dica": "Multiplique uma dezena por 6.",
+          "feedbackAcerto": "Isso: 10 × 6 = 60.",
+          "explicacao": "Dez grupos de 6 totalizam 60."
+        },
+        {
+          "id": "q2",
+          "tipo": "questao",
+          "enunciado": "Quanto é 7 × 6?",
+          "alternativas": [
+            "42",
+            "36",
+            "76"
+          ],
+          "indiceCorreto": 0,
+          "dica": "Conte 6 sete vezes.",
+          "feedbackAcerto": "Isso: 7 × 6 = 42.",
+          "explicacao": "Sete grupos de 6 totalizam 42."
+        },
+        {
+          "id": "q3",
+          "tipo": "questao",
+          "enunciado": "Agora some os resultados: quanto é 17 × 6?",
+          "alternativas": [
+            "92",
+            "102",
+            "112"
+          ],
+          "indiceCorreto": 1,
+          "dica": "Some 60 e 42.",
+          "feedbackAcerto": "Correto: 17 × 6 = 102.",
+          "explicacao": "Como 17 = 10 + 7, temos 17 × 6 = 60 + 42 = 102."
+        }
+      ]
+    }
+  ],
+  "origem": "Codex OAuth via Hermes (texto)",
+  "promptBaseVersion": 1
+}
