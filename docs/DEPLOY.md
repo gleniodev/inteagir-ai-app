@@ -44,3 +44,32 @@ por webroot exclusivo, renovado pelo certbot já instalado no VPS.
 
 Uso demonstrativo: somente perfis fictícios, conforme AGENTS.md. As contas por
 papel são de demonstração, não autenticação de produção.
+
+## Verificações observadas em 15/10/2026
+
+- Main enviada, primeiro container saudável e timer ativo; próximos commits na main são a origem do deploy.
+- HTTPS público respondeu200 após registro inteagir.ai passar para DNS sem proxy.
+- Certificado próprio emitido, renovação certbot agendada e hook de reload condicionado somente a este domínio.
+- Oito containers anteriores continuam com os mesmos IDs.
+- Texto real gpt-6-sol com PDF/dois assuntos; imagem real PNG1536x1024/869253bytes pelo cliente oficial OAuth, servida por HTTP e vinculada à prévia; zero publicações.
+- Ambos os logins novos do VPS foram confirmados; não repetir login. Perfis independentes em volumes sobrevivem a atualizações.
+- Evidências fictícias privadas em /opt/inteagir-ai/verification/texto e imagem. Ilustração aberta: quatro vagões (um azul/três cinza) e barras extras com metades; exige revisão pedagógica, não aprovada para publicação automaticamente.
+- Flags privadas de texto/imagem ativadas após gates. Não há Google/fallback ativo nem chave de API comercial.
+- INTEAGIR_TRUST_PROXY=true apenas no compose: um salto Nginx, necessário para origem HTTPS e cookie Secure; backend deve continuar inacessível diretamente pela internet.
+- Build/check:build e43 testes passaram. Acesso real aos módulos após correção e atualização automática ainda em verificação.
+
+O timer atualiza o aplicativo/compose pela revisão Git. Alterações no próprio
+update.sh, unidades systemd e Nginx exigem instalação administrativa explícita;
+não alteram proxy/serviços automaticamente. Releases, imagens e backups são
+preservados para recuperação; planejar retenção manual no diretório deste
+projeto sem docker prune global.
+
+Aceite posterior: timer detectou b67ca78 na main e atualizou sozinho o container;
+seis módulos responderam200 por HTTPS com cookie Secure. SHA256 do JSON foi
+preservado na troca, OAuth de imagem conservado, oito containers alheios intactos.
+Teste real de texto via endpoint HTTPS também retornou Funcionando. Falha
+artificial de healthcheck/rollback não foi provocada no ambiente público.
+Cloudflare: manter inteagir.ai como DNS-only enquanto a borda não tiver
+certificado que cubra inteagir.ai.glennscode.com; Universal SSL da zona
+`glennscode.com` cobre apenas um nível. Referência oficial:
+https://developers.cloudflare.com/ssl/edge-certificates/universal-ssl/limitations/.

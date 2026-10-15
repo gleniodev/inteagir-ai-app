@@ -193,3 +193,5 @@ Não houve expansão P1/P2. Pausa e retomada mínima foram incluídas porque já
 ## Vigente — T15, 15/10/2026: publicação autorizada
 
 Usuário abandonou fallback AGY e pediu somente GPT/OAuth; entrypoint não configura mais AGY. Autorizou commit/push para main, VPS isolado e atualização automática. Dono: agente principal LT/BE-IA. Dockerfile + compose próprios, persistência por volumes, Nginx apenas no subdomínio e timer Git preparados. Deploy/login/gates no VPS ainda em verificação; não considerar concluídos. Ver docs/DEPLOY.md. Credenciais locais e dados não serão enviados ao Git nem OAuth copiado.
+
+T15 — aceite técnico VPS observado em15/10/2026: main enviada; container isolado/HTTPS real; deploy b67ca78 detectado automaticamente pelo timer; origem HTTPS corrigida nos seis módulos (200/cookie Secure). Gates reais OAuth texto/PNG no VPS; JSON e OAuth sobreviveram troca; oito containers existentes preservados.43 testes/build/check:build passaram. QA de navegador/mobile/PWA permanece pendente; revisão pedagógica e ausência de autenticação real continuam conforme escopo. Evidências operacionais e limites em DEPLOY.md e topo de .ai/ESTADO_ATUAL.md.

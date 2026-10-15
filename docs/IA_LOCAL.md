@@ -1,3 +1,7 @@
+## Estado vigente no VPS — 15/10/2026
+
+Decisão do usuário: somente GPT/OpenAI OAuth, sem AGY/reserva. Main publicada; infraestrutura isolada descrita em DEPLOY.md. Dois logins novos (Hermes texto e cliente oficial Codex imagem) confirmados no VPS, sem cópia local. Gates reais de texto/PDF/dois assuntos e texto+PNG1536x1024 passaram, sem publicação. Flags privadas ativadas após testes. Histórico de AGY abaixo não é configuração vigente. Não repetir login já confirmado nem presumir aprovação pedagógica da imagem por passar na validação técnica.
+
 # T08/T10/T14 — preparação da integração local de texto
 
 ## Vigente — primária de imagem OpenAI OAuth pelo Hermes, sem reserva Google
